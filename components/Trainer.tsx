@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Card, ReviewRating, UUID } from '../db/types';
 import { db } from '../db';
 import { getDueCards, review } from '../lib/fsrs';
 import { StudyEventsRepo } from '../repo/studyEvents';
+import Link from 'next/link';
 
 interface Props {
   scope: { setId?: UUID } | { all: true };
@@ -15,6 +16,8 @@ export default function Trainer({ scope }: Props) {
   const [cards, setCards] = useState<Card[]>([]);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('show');
+  const total = cards.length;
+  const progress = total === 0 ? 0 : (index / total) * 100;
 
   useEffect(() => {
     async function load() {
@@ -51,6 +54,30 @@ export default function Trainer({ scope }: Props) {
     }
   }
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (phase === 'show' && (e.code === 'Space' || e.key === ' ')) {
+        e.preventDefault();
+        onReveal();
+        return;
+      }
+      if (phase === 'reveal') {
+        if (e.key?.toLowerCase() === 'q') onRate('again');
+        if (e.key?.toLowerCase() === 'w') onRate('hard');
+        if (e.key?.toLowerCase() === 'e') onRate('good');
+        if (e.key?.toLowerCase() === 'r') onRate('easy');
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [phase, current]);
+
+  function onRestart() {
+    setIndex(0);
+    setPhase('show');
+  }
+
   if (!current && phase !== 'done') {
     return <div className="text-sm text-gray-600">No cards due. Add new cards or study new cards anyway.</div>;
   }
@@ -60,20 +87,89 @@ export default function Trainer({ scope }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="text-lg font-semibold">{current.front}</div>
-      {phase === 'reveal' && <div className="text-gray-700">{current.back}</div>}
-      {phase === 'show' ? (
-        <button className="rounded-md bg-gray-800 text-white px-3 py-2 text-sm w-fit" onClick={onReveal}>Show answer</button>
-      ) : (
-        <div className="flex gap-2">
-          <button className="rounded-md bg-red-600 text-white px-3 py-2 text-sm" onClick={() => onRate('again')}>Again (1)</button>
-          <button className="rounded-md bg-orange-600 text-white px-3 py-2 text-sm" onClick={() => onRate('hard')}>Hard (2)</button>
-          <button className="rounded-md bg-green-600 text-white px-3 py-2 text-sm" onClick={() => onRate('good')}>Good (3)</button>
-          <button className="rounded-md bg-blue-600 text-white px-3 py-2 text-sm" onClick={() => onRate('easy')}>Easy (4)</button>
+    <div className="flex flex-col gap-10">
+      {/* Header: title + restart */}
+      <div className="flex items-center justify-between">
+        <h1 className="m-0">Study cards</h1>
+        <button className="btn-secondary" onClick={onRestart}>↻ Restart</button>
+      </div>
+
+      {/* Card */}
+      <button
+        onClick={() => phase === 'show' ? onReveal() : undefined}
+        className="mx-auto w-[520px] h-[500px] rounded-[12px] p-10 flex flex-col items-center justify-center gap-8"
+        style={{ background: 'rgba(255,255,255,0.3)' }}
+      >
+        {/* Word / Translation */}
+        <div className="flex flex-col items-center justify-center gap-8 w-full">
+          <div className="text-[56px] font-medium text-[#1C1D17] text-center leading-tight font-[var(--font-bitter)] w-full">
+            {phase === 'reveal' ? current.back : current.front}
+          </div>
+          {/* Separator */}
+          <div className="w-1/2 h-px" style={{ background: '#FFFFFF' }} />
+          {/* Info labels */}
+          {phase === 'show' && (
+            <div className="flex flex-col items-center gap-2">
+              <div className="text-[16px] font-medium text-[#1C1D17] font-[var(--font-bitter)]">Click to reveal</div>
+              <div className="text-[16px] font-medium text-[#8D8E8B] font-[var(--font-bitter)]">Space</div>
+            </div>
+          )}
+        </div>
+      </button>
+
+      {/* Rating buttons */}
+      {phase === 'reveal' && (
+        <div className="flex items-center justify-center gap-6">
+          <button onClick={() => onRate('again')} className="btn-primary" style={{ background: '#EE683F' }}>
+            <span>Again</span>
+            <span style={{ color: 'rgba(246,244,240,0.6)' }}>Q</span>
+          </button>
+          <button onClick={() => onRate('hard')} className="btn-primary" style={{ background: '#F59B14' }}>
+            <span>Hard</span>
+            <span style={{ color: 'rgba(246,244,240,0.6)' }}>W</span>
+          </button>
+          <button onClick={() => onRate('good')} className="btn-primary" style={{ background: '#289500' }}>
+            <span>Good</span>
+            <span style={{ color: 'rgba(246,244,240,0.6)' }}>E</span>
+          </button>
+          <button onClick={() => onRate('easy')} className="btn-primary" style={{ background: '#008995' }}>
+            <span>Easy</span>
+            <span style={{ color: 'rgba(246,244,240,0.6)' }}>R</span>
+          </button>
         </div>
       )}
-      <div className="text-xs text-gray-500">{index + 1} / {cards.length}</div>
+
+      {/* Progress and navigation */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              const prev = Math.max(0, index - 1);
+              setIndex(prev);
+              setPhase('show');
+            }}
+          >
+            ← Previous
+          </button>
+          <div className="text-[16px] font-medium font-[var(--font-bitter)] text-[#1C1D17]">
+            {Math.min(index + 1, total)} / {total}
+          </div>
+          <button
+            className="btn-secondary"
+            onClick={() => {
+              const next = Math.min(total - 1, index + 1);
+              setIndex(next);
+              setPhase('show');
+            }}
+          >
+            Next →
+          </button>
+        </div>
+        <div className="w-full h-1" style={{ background: '#FFFFFF' }}>
+          <div className="h-full" style={{ width: `${progress}%`, background: '#1C1D17' }} />
+        </div>
+      </div>
     </div>
   );
 }
