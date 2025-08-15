@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+:root {
+  --background: #E8E2D9;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-bitter), serif;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: 40px;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-family: var(--font-bitter), serif;
+  font-weight: 400;
+  font-size: 24px;
+}
+
+/* Reusable buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 200px;
+  height: 52px;
+  border-radius: 8px;
+  background: #1C1D17;
+  color: #F6F4F0;
+  font-family: var(--font-bitter), serif;
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  color: #1C1D17;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: var(--font-bitter), serif;
+  font-weight: 500;
+  font-size: 18px;
+  outline: none;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* Reusable Input */
+.input {
+  width: 100%;
+  height: 52px; /* 52px height */
+  background: #FFFFFF;
+  border: 1px solid #E8E2D9; /* default stroke */
+  border-radius: 8px;
+  padding: 0 20px; /* 20px inner padding */
+  font-family: var(--font-bitter), serif;
+  font-weight: 500; /* medium */
+  font-size: 18px; /* 18px text */
+  color: #1C1D17;
+}
+
+.input::placeholder {
+  color: #8D8E8B;
+}
+
+.input:focus,
+.input:active {
+  border-color: #1C1D17; /* active/focus outline color */
+  outline: 1px solid #1C1D17;
+  outline-offset: 0;
+}
+
+/* Reusable Select (setSelect) */
+.select {
+  width: 100%;
+  height: 52px;
+  background: #FFFFFF;
+  border: 1px solid #E8E2D9;
+  border-radius: 8px;
+  padding: 0 20px;
+  font-family: var(--font-bitter), serif;
+  font-weight: 500;
+  font-size: 18px;
+  color: #1C1D17;
+  appearance: none;
+}
+
+.select:focus,
+.select:active {
+  border-color: #1C1D17;
+  outline: 1px solid #1C1D17;
+  outline-offset: 0;
+}
