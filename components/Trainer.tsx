@@ -139,9 +139,9 @@ export default function Trainer({ scope }: Props) {
         </div>
       )}
 
-      {/* Progress and navigation */}
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
+      {/* Progress and navigation (fixed at bottom with 80px margin) */}
+      <div className="fixed bottom-[80px] left-1/2 -translate-x-1/2 w-full max-w-[800px] flex flex-col gap-3 px-6">
+        <div className="flex items-center justify-between w-full">
           <button
             className="btn-secondary"
             onClick={() => {
