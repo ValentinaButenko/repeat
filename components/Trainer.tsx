@@ -102,16 +102,20 @@ export default function Trainer({ scope }: Props) {
       >
         {/* Word / Translation */}
         <div className="flex flex-col items-center justify-center gap-8 w-full">
-          <div className="text-[56px] font-medium text-[#1C1D17] text-center leading-tight font-[var(--font-bitter)] w-full">
-            {phase === 'reveal' ? current.back : current.front}
+          <div className="text-[48px] font-medium text-[#1C1D17] text-center leading-tight font-[var(--font-bitter)] w-full">
+            {current.front}
           </div>
           {/* Separator */}
           <div className="w-1/2 h-px" style={{ background: '#FFFFFF' }} />
-          {/* Info labels */}
-          {phase === 'show' && (
+          {/* Info labels or translation */}
+          {phase === 'show' ? (
             <div className="flex flex-col items-center gap-2">
               <div className="text-[16px] font-medium text-[#1C1D17] font-[var(--font-bitter)]">Click to reveal</div>
               <div className="text-[16px] font-medium text-[#8D8E8B] font-[var(--font-bitter)]">Space</div>
+            </div>
+          ) : (
+            <div className="text-[48px] font-medium text-[#1C1D17] text-center leading-tight font-[var(--font-bitter)] w-full">
+              {current.back}
             </div>
           )}
         </div>
@@ -120,19 +124,19 @@ export default function Trainer({ scope }: Props) {
       {/* Rating buttons */}
       {phase === 'reveal' && (
         <div className="flex items-center justify-center gap-6">
-          <button onClick={() => onRate('again')} className="btn-primary" style={{ background: '#EE683F' }}>
+          <button onClick={() => onRate('again')} className="btn-primary" style={{ background: '#EE683F', width: '120px' }}>
             <span>Again</span>
             <span style={{ color: 'rgba(246,244,240,0.6)' }}>Q</span>
           </button>
-          <button onClick={() => onRate('hard')} className="btn-primary" style={{ background: '#F59B14' }}>
+          <button onClick={() => onRate('hard')} className="btn-primary" style={{ background: '#F59B14', width: '120px' }}>
             <span>Hard</span>
             <span style={{ color: 'rgba(246,244,240,0.6)' }}>W</span>
           </button>
-          <button onClick={() => onRate('good')} className="btn-primary" style={{ background: '#289500' }}>
+          <button onClick={() => onRate('good')} className="btn-primary" style={{ background: '#289500', width: '120px' }}>
             <span>Good</span>
             <span style={{ color: 'rgba(246,244,240,0.6)' }}>E</span>
           </button>
-          <button onClick={() => onRate('easy')} className="btn-primary" style={{ background: '#008995' }}>
+          <button onClick={() => onRate('easy')} className="btn-primary" style={{ background: '#008995', width: '120px' }}>
             <span>Easy</span>
             <span style={{ color: 'rgba(246,244,240,0.6)' }}>R</span>
           </button>
