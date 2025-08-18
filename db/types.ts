@@ -6,6 +6,7 @@ export interface UserSettings {
   learningLanguage: string;
   nativeLanguage: string;
   translationApiBaseUrl?: string;
+  lastStudiedSetId?: UUID;
   createdAt: string;
   updatedAt: string;
 }

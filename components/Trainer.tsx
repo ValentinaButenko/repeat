@@ -7,14 +7,16 @@ import { StudyEventsRepo } from '../repo/studyEvents';
 import Link from 'next/link';
 import Modal from './Modal';
 import LottieOnce from './LottieOnce';
+import { UserSettingsRepo } from '../repo/userSettings';
 
 interface Props {
   scope: { setId?: UUID } | { all: true };
+  forceAll?: boolean; // when true, start session with all cards in scope, not just due
 }
 
 type Phase = 'show' | 'reveal' | 'done';
 
-export default function Trainer({ scope }: Props) {
+export default function Trainer({ scope, forceAll = false }: Props) {
   const [cards, setCards] = useState<Card[]>([]);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('show');
@@ -23,14 +25,20 @@ export default function Trainer({ scope }: Props) {
 
   useEffect(() => {
     async function load() {
-      const all = scopeHasAll(scope) ? await db.cards.toArray() : await db.cards.where('setId').equals((scope as { setId: UUID }).setId).toArray();
-      const due = getDueCards(all);
-      setCards(due);
+      const all = scopeHasAll(scope)
+        ? await db.cards.toArray()
+        : await db.cards.where('setId').equals((scope as { setId: UUID }).setId).toArray();
+      const initial = forceAll ? all : getDueCards(all);
+      setCards(initial);
       setIndex(0);
       setPhase('show');
+      // remember last studied set
+      if (!scopeHasAll(scope)) {
+        await UserSettingsRepo.save({ lastStudiedSetId: (scope as { setId: UUID }).setId });
+      }
     }
     load();
-  }, [scope]);
+  }, [scope, forceAll]);
 
   const current = cards[index];
 

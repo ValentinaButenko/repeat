@@ -5,10 +5,14 @@ import { db } from '../../db';
 import { useEffect, useState } from 'react';
 import type { CardSet } from '../../db/types';
 import { SetRepo } from '../../repo/sets';
+import { UserSettingsRepo } from '../../repo/userSettings';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
+  const router = useRouter();
   const [sets, setSets] = useState<CardSet[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [lastSetId, setLastSetId] = useState<string | null>(null);
   useEffect(() => {
     let mounted = true;
     SetRepo.list().then((s) => mounted && setSets(s));
@@ -19,6 +23,11 @@ export default function HomePage() {
       mounted = false;
       clearInterval(interval);
     };
+  }, []);
+  useEffect(() => {
+    let mounted = true;
+    UserSettingsRepo.get().then((s) => mounted && setLastSetId(s?.lastStudiedSetId ?? null));
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -58,12 +67,18 @@ export default function HomePage() {
               - Gretchen Rubin
             </div>
             <div className="mt-4">
-              <Link href="/study/all" className="btn-primary">
+              <button
+                className="btn-primary"
+                onClick={() => {
+                  if (lastSetId) router.push(`/study/${lastSetId}`);
+                  else router.push('/study/all');
+                }}
+              >
                 <span>Study</span>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-              </Link>
+              </button>
             </div>
           </div>
           <div className="flex-1 overflow-hidden ml-6">
