@@ -5,17 +5,14 @@ const DEEPL_KEY = process.env.NEXT_PUBLIC_DEEPL_API_KEY;
 export async function translate(text: string, from: string, to: string, baseUrl: string = LIBRE_BASE): Promise<string> {
   if (!text.trim()) return '';
 
-  // Prefer OpenAI (server route) if configured
-  if (process.env.NEXT_PUBLIC_USE_OPENAI_TRANSLATE === '1' || process.env.OPENAI_API_KEY) {
-    const viaOpenAI = await translateWithOpenAI(text, from, to);
-    if (viaOpenAI) return viaOpenAI;
-  }
-  // Then DeepL if API key is configured
+  // Prefer server route (OpenAI→DeepL→Libre) to avoid CORS and unify logic
+  const viaServer = await translateWithOpenAIServer(text, from, to);
+  if (viaServer) return viaServer;
+  // Fallbacks in client in case API route is unavailable
   if (DEEPL_KEY) {
     const viaDeepL = await translateWithDeepL(text, from, to);
     if (viaDeepL) return viaDeepL;
   }
-  // Fallback to Libre
   return translateWithLibre(text, from, to, baseUrl);
 }
 
@@ -82,7 +79,7 @@ async function translateWithDeepL(text: string, from: string, to: string): Promi
   }
 }
 
-async function translateWithOpenAI(text: string, from: string, to: string): Promise<string> {
+async function translateWithOpenAIServer(text: string, from: string, to: string): Promise<string> {
   try {
     const res = await fetch('/api/translate', {
       method: 'POST',
