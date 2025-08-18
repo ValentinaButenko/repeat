@@ -75,6 +75,10 @@ h1 {
   line-height: 1;
 }
 
+.btn-secondary:hover {
+  background: #F6F4F0;
+}
+
 /* Reusable Input */
 .input {
   width: 100%;
