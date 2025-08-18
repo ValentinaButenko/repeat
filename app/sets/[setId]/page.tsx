@@ -45,7 +45,7 @@ export default function SetDetails() {
     return c.front.toLowerCase().includes(q) || (c.back ?? '').toLowerCase().includes(q);
   });
   return (
-    <div className="mx-auto p-6 max-w-[980px] flex flex-col gap-6">
+    <div className="mx-auto px-[140px] pt-[120px] max-w-[1280px] flex flex-col gap-6">
       <Breadcrumbs />
       <div className="flex items-center justify-between">
         <h1 className="m-0">{set.name}</h1>

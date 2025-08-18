@@ -6,7 +6,7 @@ export default function StudyAllPage({ searchParams }: { searchParams: Promise<{
   const sp = use(searchParams);
   const forceAll = sp?.restart === '1';
   return (
-    <div className="mx-auto p-6 max-w-[800px]">
+    <div className="mx-auto px-[140px] pt-[120px] max-w-[1280px]">
       <Breadcrumbs />
       <Trainer scope={{ all: true }} forceAll={forceAll} />
     </div>
