@@ -26,11 +26,13 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<string[] | null>(null);
+  const [duplicateInfo, setDuplicateInfo] = useState<{ word: string; setName: string } | null>(null);
   const [isMac, setIsMac] = useState(false);
   const [frontInputEl, setFrontInputEl] = useState<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setError(null);
+    setDuplicateInfo(null);
   }, [setId, front]);
 
   useEffect(() => {
@@ -75,7 +77,8 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
     }
     const nf = normalizeFront(front);
     if (await CardRepo.existsInSet(setId, nf)) {
-      setError('A card with this front already exists in the selected set.');
+      const set = await db.sets.get(setId);
+      setDuplicateInfo({ word: front, setName: set?.name ?? 'this set' });
       return;
     }
     try {
@@ -142,6 +145,11 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
             </div>
           )}
         </div>
+        {duplicateInfo && (
+          <div style={{ marginTop: 12, fontFamily: 'var(--font-bitter)', fontSize: 16, fontWeight: 400, color: '#EE683F' }}>
+            The {duplicateInfo.word} is already in {duplicateInfo.setName}
+          </div>
+        )}
       </div>
       {/* Translation area */}
       <div className="mt-8 flex items-center justify-between" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 500, fontSize: 24 }}>
