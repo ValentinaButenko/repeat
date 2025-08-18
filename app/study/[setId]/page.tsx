@@ -1,13 +1,12 @@
 "use client";
 import Trainer from '../../../components/Trainer';
 import type { UUID } from '../../../db/types';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 
-export default function StudySetPage() {
+export default function StudySetPage({ searchParams }: { searchParams: { restart?: string } }) {
   const params = useParams<{ setId: string }>();
-  const search = useSearchParams();
-  const forceAll = search.get('restart') === '1';
+  const forceAll = searchParams?.restart === '1';
   return (
     <div className="mx-auto p-6 max-w-[800px]">
       <Breadcrumbs />

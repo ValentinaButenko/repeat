@@ -1,10 +1,8 @@
 import Trainer from '../../../components/Trainer';
 import Breadcrumbs from '../../../components/Breadcrumbs';
-import { useSearchParams } from 'next/navigation';
 
-export default function StudyAllPage() {
-  const search = useSearchParams();
-  const forceAll = search.get('restart') === '1';
+export default function StudyAllPage({ searchParams }: { searchParams: { restart?: string } }) {
+  const forceAll = searchParams?.restart === '1';
   return (
     <div className="mx-auto p-6 max-w-[800px]">
       <Breadcrumbs />
