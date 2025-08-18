@@ -1,10 +1,25 @@
-const DEFAULT_BASE = process.env.NEXT_PUBLIC_TRANSLATE_BASE_URL || 'https://libretranslate.com';
+const LIBRE_BASE = process.env.NEXT_PUBLIC_TRANSLATE_BASE_URL || 'https://libretranslate.com';
+const DEEPL_BASE = process.env.NEXT_PUBLIC_DEEPL_API_BASE_URL || 'https://api-free.deepl.com';
+const DEEPL_KEY = process.env.NEXT_PUBLIC_DEEPL_API_KEY;
 
-export async function translate(text: string, from: string, to: string, baseUrl: string = DEFAULT_BASE): Promise<string> {
+export async function translate(text: string, from: string, to: string, baseUrl: string = LIBRE_BASE): Promise<string> {
   if (!text.trim()) return '';
+
+  // Prefer server route (OpenAI→DeepL→Libre) to avoid CORS and unify logic
+  const viaServer = await translateWithOpenAIServer(text, from, to);
+  if (viaServer) return viaServer;
+  // Fallbacks in client in case API route is unavailable
+  if (DEEPL_KEY) {
+    const viaDeepL = await translateWithDeepL(text, from, to);
+    if (viaDeepL) return viaDeepL;
+  }
+  return translateWithLibre(text, from, to, baseUrl);
+}
+
+async function translateWithLibre(text: string, from: string, to: string, baseUrl: string): Promise<string> {
   const url = `${baseUrl.replace(/\/$/, '')}/translate`;
   const body = { q: text, source: from, target: to, format: 'text' } as const;
-  try {
+  const attempt = async () => {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -14,22 +29,68 @@ export async function translate(text: string, from: string, to: string, baseUrl:
     const data = await res.json();
     const v = data.translatedText ?? data.translation ?? '';
     return String(v);
-  } catch (e) {
-    // retry once after a small delay
+  };
+  try {
+    return await attempt();
+  } catch {
     await new Promise((r) => setTimeout(r, 400));
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const v = data.translatedText ?? data.translation ?? '';
-      return String(v);
-    } catch {
-      return '';
-    }
+    try { return await attempt(); } catch { return ''; }
+  }
+}
+
+function mapToDeepLLang(code: string, isTarget: boolean): string | undefined {
+  if (!code || code.toLowerCase() === 'auto') return undefined; // let DeepL auto-detect
+  const c = code.toLowerCase();
+  // Common mappings; fallback to upper-case 2-letter code
+  if (c === 'en') return 'EN';
+  if (c === 'pt') return isTarget ? 'PT-PT' : 'PT';
+  if (c === 'zh' || c === 'zh-cn') return 'ZH';
+  return c.toUpperCase();
+}
+
+async function translateWithDeepL(text: string, from: string, to: string): Promise<string> {
+  const url = `${DEEPL_BASE.replace(/\/$/, '')}/v2/translate`;
+  const params = new URLSearchParams();
+  params.set('text', text);
+  const target = mapToDeepLLang(to, true) ?? 'EN';
+  params.set('target_lang', target);
+  const source = mapToDeepLLang(from, false);
+  if (source) params.set('source_lang', source);
+
+  const attempt = async () => {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `DeepL-Auth-Key ${DEEPL_KEY}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const textOut = data?.translations?.[0]?.text ?? '';
+    return String(textOut);
+  };
+  try {
+    return await attempt();
+  } catch {
+    await new Promise((r) => setTimeout(r, 400));
+    try { return await attempt(); } catch { return ''; }
+  }
+}
+
+async function translateWithOpenAIServer(text: string, from: string, to: string): Promise<string> {
+  try {
+    const res = await fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, from, to }),
+    });
+    if (!res.ok) return '';
+    const data = await res.json();
+    return String(data?.translatedText ?? '');
+  } catch {
+    return '';
   }
 }
 

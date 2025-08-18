@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { translate } from '../lib/translation';
+import { UserSettingsRepo } from '../repo/userSettings';
+import { languageToCode } from '../lib/languages';
 import SetPicker from './SetPicker';
 import { normalizeFront } from '../repo/normalize';
 import { CardRepo, safeCreateCard } from '../repo/cards';
@@ -43,7 +45,10 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
     setError(null);
     setCandidates(null);
     try {
-      const translated = await translate(front, 'auto', 'en');
+      const settings = await UserSettingsRepo.get();
+      const to = languageToCode(settings?.nativeLanguage) ?? 'en';
+      const from = languageToCode(settings?.learningLanguage) ?? 'auto';
+      const translated = await translate(front, from, to);
       if (translated && typeof translated === 'string') {
         // Allow comma/semicolon separated suggestions if backend returns like that
         const parts = String(translated).split(/[;,]/).map((s) => s.trim()).filter(Boolean);
