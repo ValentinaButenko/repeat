@@ -8,7 +8,7 @@ export default function StudySetPage({ params, searchParams }: { params: { setId
   const sp = use(searchParams);
   const forceAll = sp?.restart === '1';
   return (
-    <div className="mx-auto px-[140px] pt-[120px] max-w-[1280px]">
+    <div className="mx-auto pt-[80px] max-w-[1280px]">
       <Breadcrumbs />
       <Trainer scope={{ setId: params.setId as unknown as UUID }} forceAll={forceAll} />
     </div>
