@@ -11,6 +11,7 @@ export default function SetDetails() {
   const search = useSearchParams();
   const [set, setSet] = useState<CardSet | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
+  const [query, setQuery] = useState('');
 
   async function load() {
     const id = params.setId;
@@ -38,35 +39,75 @@ export default function SetDetails() {
 
   if (!set) return <div className="p-6">Set not found.</div>;
   const setId = params.setId;
+  const filtered = cards.filter((c) => {
+    if (!query.trim()) return true;
+    const q = query.toLowerCase();
+    return c.front.toLowerCase().includes(q) || (c.back ?? '').toLowerCase().includes(q);
+  });
   return (
-    <div className="max-w-3xl mx-auto p-6 flex flex-col gap-4">
+    <div className="mx-auto p-6 max-w-[980px] flex flex-col gap-6">
       <Breadcrumbs />
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{set.name}</h1>
-        <div className="flex gap-2">
-          <Link href={`/study/${setId}?restart=1`} className="rounded-md bg-blue-600 text-white px-3 py-2 text-sm">Study set</Link>
-          <Link href={`/sets/${setId}/new-card`} className="rounded-md border px-3 py-2 text-sm">Add card</Link>
-          <button className="rounded-md border px-3 py-2 text-sm" disabled>Generate cards</button>
+        <h1 className="m-0">{set.name}</h1>
+        <div className="flex items-center gap-4">
+          <Link href={`/sets/${setId}/new-card`} className="btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
+              <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/>
+            </svg>
+            <span>Add card</span>
+          </Link>
+          <button className="btn-secondary" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+              <path d="M12 3l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z" strokeWidth="1.8"/>
+            </svg>
+            <span>Generate cards</span>
+          </button>
+          <Link href={`/study/${setId}?restart=1`} className="btn-primary">
+            <span>Study</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </Link>
         </div>
       </div>
-      <input placeholder="Search" className="rounded-md border border-gray-300 px-3 py-2 text-sm" />
-      <ul className="divide-y">
-        {cards.map((c) => (
-          <li key={c.id}>
+
+      {/* Search */}
+      <div className="relative">
+        <input
+          className="input pl-12"
+          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D8E8B]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" strokeWidth="1.8" />
+            <line x1="16.65" y1="16.65" x2="21" y2="21" strokeWidth="1.8" />
+          </svg>
+        </div>
+      </div>
+
+      {/* Cards grid */}
+      {filtered.length === 0 ? (
+        <div className="mt-6 text-sm text-gray-600">No matching cards.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((c) => (
             <Link
+              key={c.id}
               href={`/sets/${setId}/edit-card/${c.id}`}
-              className="flex items-center justify-between py-2 px-2 rounded hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="rounded-xl p-4 transition-all bg-white/30 hover:bg-white/45 active:translate-y-px"
             >
-              <div>
-                <div className="font-medium">{c.front}</div>
-                <div className="text-gray-600 text-sm">{c.back}</div>
+              <div className="text-[#1C1D17]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 600, fontSize: 16 }}>
+                {c.front}
               </div>
-              <span className="text-blue-600 text-sm">Edit</span>
+              <div className="mt-2 text-[#5B5B55]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 400, fontSize: 12 }}>
+                {c.back}
+              </div>
             </Link>
-          </li>
-        ))}
-        {cards.length === 0 && <li className="py-6 text-sm text-gray-600">No cards yet.</li>}
-      </ul>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
