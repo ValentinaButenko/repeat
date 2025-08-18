@@ -20,8 +20,12 @@ export async function POST(req: Request) {
 
   // Finally LibreTranslate
   const libreBase = process.env.TRANSLATE_BASE_URL || process.env.NEXT_PUBLIC_TRANSLATE_BASE_URL || 'https://libretranslate.com';
-  const out = await translateWithLibre(text, from, to, libreBase);
-  return NextResponse.json({ translatedText: out, provider: 'libre' }, { status: 200 });
+  let out = await translateWithLibre(text, from, to, libreBase);
+  if (out) return NextResponse.json({ translatedText: out, provider: 'libre' }, { status: 200 });
+
+  // Ultimate fallback: MyMemory (public)
+  out = await translateWithMyMemory(text, from, to);
+  return NextResponse.json({ translatedText: out, provider: 'mymemory' }, { status: 200 });
 }
 
 async function translateWithOpenAI(text: string, from: string, to: string, key: string): Promise<string> {
@@ -88,6 +92,17 @@ function mapToDeepLLang(code: string, isTarget: boolean): string | undefined {
   if (c === 'pt') return isTarget ? 'PT-PT' : 'PT';
   if (c === 'zh' || c === 'zh-cn') return 'ZH';
   return c.toUpperCase();
+}
+
+async function translateWithMyMemory(text: string, from: string, to: string): Promise<string> {
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${encodeURIComponent((from || 'auto'))}|${encodeURIComponent(to || 'en')}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('mymemory');
+    const data = await res.json();
+    const v = data?.responseData?.translatedText ?? '';
+    return String(v);
+  } catch { return ''; }
 }
 
 
