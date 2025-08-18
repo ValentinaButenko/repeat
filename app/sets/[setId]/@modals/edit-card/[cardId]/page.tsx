@@ -63,7 +63,7 @@ export default function EditCardModal() {
       {!card ? (
         <div className="p-4 text-sm">Loading…</div>
       ) : (
-        <div className="flex flex-col gap-6" style={{ fontFamily: 'var(--font-bitter)' }}>
+        <div className="flex flex-col gap-6 pb-8" style={{ fontFamily: 'var(--font-bitter)' }}>
           <div className="flex gap-6">
             <input className="input flex-1" value={front} onChange={(e) => setFront(e.target.value)} />
             <div className="w-[280px]">
