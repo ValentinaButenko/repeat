@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Card, ReviewRating, UUID } from '../db/types';
 import { db } from '../db';
 import { getDueCards, review } from '../lib/fsrs';
@@ -84,8 +84,6 @@ export default function Trainer({ scope }: Props) {
     return <div className="text-sm text-gray-600">No cards due. Add new cards or study new cards anyway.</div>;
   }
 
-  const completedCount = useMemo(() => (total === 0 ? 0 : index), [index, total]);
-
   if (phase === 'done') {
     return (
       <Modal
@@ -101,7 +99,7 @@ export default function Trainer({ scope }: Props) {
             className="text-center text-[#1C1D17] font-[var(--font-bitter)] font-medium"
             style={{ fontSize: 34 }}
           >
-            {`Amazing, you've repeated ${completedCount} words!`}
+            {`Amazing, you've repeated ${cards.length} words!`}
           </div>
           <div className="flex items-center justify-center gap-6">
             <Link href="/home" className="btn-primary">Back to Home</Link>
