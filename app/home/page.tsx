@@ -70,7 +70,7 @@ export default function HomePage() {
               <button
                 className="btn-primary"
                 onClick={() => {
-                  if (lastSetId) router.push(`/study/${lastSetId}`);
+                  if (lastSetId) router.push(`/study/${lastSetId}?restart=1`);
                   else router.push('/study/all');
                 }}
               >
