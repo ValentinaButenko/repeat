@@ -63,7 +63,7 @@ export default function EditCardModal() {
       {!card ? (
         <div className="p-4 text-sm">Loading…</div>
       ) : (
-        <div className="flex flex-col gap-6" style={{ fontFamily: 'var(--font-bitter)' }}>
+        <div className="flex flex-col gap-6 h-full" style={{ fontFamily: 'var(--font-bitter)' }}>
           <div className="flex gap-6">
             <input className="input flex-1" value={front} onChange={(e) => setFront(e.target.value)} />
             <div className="w-[280px]">
@@ -72,7 +72,7 @@ export default function EditCardModal() {
           </div>
           <textarea className="input" style={{ height: 240, padding: 20 }} value={back} onChange={(e) => setBack(e.target.value)} />
           {error && <div className="text-sm text-red-600">{error}</div>}
-          <div className="flex items-center justify-between mt-2">
+          <div className="mt-auto pt-4 sticky bottom-0 bg-[#F6F4F0] -mx-8 px-8 pb-0 flex items-center justify-between">
             <button onClick={remove} className="btn-primary" style={{ background: '#EE683F', width: 120 }}>Delete</button>
             <div className="flex items-center gap-4">
               <button onClick={() => history.back()} className="btn-secondary">Cancel</button>
