@@ -9,6 +9,7 @@ interface Props {
 
 // Reusable app-styled modal based on the Edit Card modal visuals
 export default function AppModal({ title, children, className }: Props) {
+  // p-8 = 32px padding on all sides, matching required inner margins
   const base = "rounded-xl w-full max-w-[720px] h-[560px] overflow-auto bg-[#F6F4F0] p-8";
   return (
     <Modal
