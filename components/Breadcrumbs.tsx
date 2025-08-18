@@ -20,7 +20,10 @@ export default function Breadcrumbs() {
 
   return (
     <div className="mb-2">
-      <Link href={parent} className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+      <Link
+        href={parent}
+        className="inline-flex items-center gap-2 text-[18px] font-medium text-[#1C1D17] font-[var(--font-bitter)] no-underline hover:opacity-80 active:opacity-60"
+      >
         <span aria-hidden>←</span>
         <span>{label}</span>
       </Link>

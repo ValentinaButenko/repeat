@@ -44,7 +44,7 @@ export default function SetDetails() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">{set.name}</h1>
         <div className="flex gap-2">
-          <Link href={`/study/${setId}`} className="rounded-md bg-blue-600 text-white px-3 py-2 text-sm">Study set</Link>
+          <Link href={`/study/${setId}?restart=1`} className="rounded-md bg-blue-600 text-white px-3 py-2 text-sm">Study set</Link>
           <Link href={`/sets/${setId}/new-card`} className="rounded-md border px-3 py-2 text-sm">Add card</Link>
           <button className="rounded-md border px-3 py-2 text-sm" disabled>Generate cards</button>
         </div>
