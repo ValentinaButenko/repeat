@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Modal from '../../../../../../components/Modal';
+import AppModal from '../../../../../../components/AppModal';
 import SetPicker from '../../../../../../components/SetPicker';
 import type { Card } from '../../../../../../db/types';
 import { db } from '../../../../../../db';
@@ -59,7 +59,7 @@ export default function EditCardModal() {
   }
 
   return (
-    <Modal title="Edit card">
+    <AppModal title="Edit card">
       {!card ? (
         <div className="p-4 text-sm">Loading…</div>
       ) : (
@@ -81,7 +81,7 @@ export default function EditCardModal() {
           </div>
         </div>
       )}
-    </Modal>
+    </AppModal>
   );
 }
 
