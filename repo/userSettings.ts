@@ -12,8 +12,8 @@ export const UserSettingsRepo = {
     const now = new Date().toISOString();
     const base: UserSettings = existing ?? {
       id: 'singleton',
-      learningLanguage: 'Spanish',
-      nativeLanguage: 'English',
+      learningLanguage: 'es',
+      nativeLanguage: 'en',
       translationApiBaseUrl: process.env.NEXT_PUBLIC_TRANSLATE_BASE_URL,
       createdAt: now,
       updatedAt: now,
