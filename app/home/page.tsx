@@ -51,7 +51,7 @@ export default function HomePage() {
     };
   }, [sets]);
   return (
-    <div className="w-full px-[200px] pt-[120px] flex flex-col gap-6">
+    <div className="w-full pt-[80px] flex flex-col gap-6">
       <div>
         <h1>Repeat</h1>
         <p className="subtitle mt-2">Let's repeat some words today.</p>

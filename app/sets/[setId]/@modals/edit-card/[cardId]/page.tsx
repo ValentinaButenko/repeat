@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Modal from '../../../../../../components/Modal';
+import AppModal from '../../../../../../components/AppModal';
+import SetPicker from '../../../../../../components/SetPicker';
 import type { Card } from '../../../../../../db/types';
 import { db } from '../../../../../../db';
 import { CardRepo } from '../../../../../../repo/cards';
@@ -44,7 +45,7 @@ export default function EditCardModal() {
     router.back();
   }
 
-  async function move(targetSetId: string) {
+  async function changeSet(targetSetId: string) {
     if (!card) return;
     try {
       await CardRepo.move(card.id, targetSetId);
@@ -52,32 +53,35 @@ export default function EditCardModal() {
         window.dispatchEvent(new CustomEvent('cards:changed', { detail: { setId: card.setId } }));
         window.dispatchEvent(new CustomEvent('cards:changed', { detail: { setId: targetSetId } }));
       }
-      router.back();
     } catch {
       setError('Duplicate exists in target set.');
     }
   }
 
   return (
-    <Modal title="Edit card">
+    <AppModal title="Edit card">
       {!card ? (
         <div className="p-4 text-sm">Loading…</div>
       ) : (
-        <div className="flex flex-col gap-3">
-          <input className="rounded-md border border-gray-300 px-3 py-2 text-sm" value={front} onChange={(e) => setFront(e.target.value)} />
-          <textarea className="rounded-md border border-gray-300 px-3 py-2 text-sm" value={back} onChange={(e) => setBack(e.target.value)} rows={3} />
+        <div className="flex flex-col gap-6 h-full" style={{ fontFamily: 'var(--font-bitter)' }}>
+          <div className="flex gap-6">
+            <input className="input flex-1" value={front} onChange={(e) => setFront(e.target.value)} />
+            <div className="w-[280px]">
+              <SetPicker value={card.setId} onChange={changeSet} />
+            </div>
+          </div>
+          <textarea className="input" style={{ height: 240, padding: 20 }} value={back} onChange={(e) => setBack(e.target.value)} />
           {error && <div className="text-sm text-red-600">{error}</div>}
-          <div className="flex gap-2 justify-between">
-            <button onClick={remove} className="rounded-md bg-red-600 text-white px-3 py-2 text-sm">Delete</button>
-            <div className="flex gap-2">
-              <button onClick={() => move(prompt('Target set ID?') || card.setId)} className="rounded-md border px-3 py-2 text-sm">Move</button>
-              <button onClick={() => history.back()} className="rounded-md border px-3 py-2 text-sm">Cancel</button>
-              <button onClick={save} className="rounded-md bg-blue-600 text-white px-3 py-2 text-sm">Save</button>
+          <div className="mt-auto pt-4 sticky bottom-0 bg-[#F6F4F0] -mx-8 px-8 pb-0 flex items-center justify-between">
+            <button onClick={remove} className="btn-primary" style={{ background: '#EE683F', width: 120 }}>Delete</button>
+            <div className="flex items-center gap-4">
+              <button onClick={() => history.back()} className="btn-secondary">Cancel</button>
+              <button onClick={save} className="btn-primary" style={{ width: 120 }}>Save</button>
             </div>
           </div>
         </div>
       )}
-    </Modal>
+    </AppModal>
   );
 }
 
