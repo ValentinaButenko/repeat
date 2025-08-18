@@ -70,7 +70,7 @@ export default function EditCardModal() {
               <SetPicker value={card.setId} onChange={changeSet} />
             </div>
           </div>
-          <textarea className="input" style={{ height: 300, padding: 20 }} value={back} onChange={(e) => setBack(e.target.value)} />
+          <textarea className="input" style={{ height: 240, padding: 20 }} value={back} onChange={(e) => setBack(e.target.value)} />
           {error && <div className="text-sm text-red-600">{error}</div>}
           <div className="flex items-center justify-between mt-2">
             <button onClick={remove} className="btn-primary" style={{ background: '#EE683F', width: 120 }}>Delete</button>
