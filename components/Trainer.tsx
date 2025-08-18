@@ -80,43 +80,20 @@ export default function Trainer({ scope }: Props) {
     setPhase('show');
   }
 
+  async function restartAll() {
+    const all = scopeHasAll(scope)
+      ? await db.cards.toArray()
+      : await db.cards.where('setId').equals((scope as { setId: UUID }).setId).toArray();
+    setCards(all);
+    setIndex(0);
+    setPhase('show');
+  }
+
   if (!current && phase !== 'done') {
     return <div className="text-sm text-gray-600">No cards due. Add new cards or study new cards anyway.</div>;
   }
 
-  if (phase === 'done') {
-    return (
-      <Modal
-        title=""
-        className="bg-[#F6F4F0] rounded-[12px] shadow-lg max-w-[720px] w-full p-8"
-      >
-        <div className="flex flex-col items-center gap-8">
-          <LottieOnce
-            src="/lotties/check-lfbLmjdZm0.json"
-            className="w-[120px] h-[120px]"
-          />
-          <div
-            className="text-center text-[#1C1D17] font-[var(--font-bitter)] font-medium"
-            style={{ fontSize: 34 }}
-          >
-            {`Amazing, you've repeated ${cards.length} words!`}
-          </div>
-          <div className="flex items-center justify-center gap-6">
-            <Link href="/home" className="btn-primary">Back to Home</Link>
-            <button
-              className="btn-secondary"
-              onClick={() => {
-                setIndex(0);
-                setPhase('show');
-              }}
-            >
-              Repeat again
-            </button>
-          </div>
-        </div>
-      </Modal>
-    );
-  }
+  const showCompletion = phase === 'done';
 
   return (
     <div className="flex flex-col gap-10">
@@ -206,6 +183,34 @@ export default function Trainer({ scope }: Props) {
           <div className="h-full" style={{ width: `${progress}%`, background: '#1C1D17' }} />
         </div>
       </div>
+      {showCompletion && (
+        <Modal
+          title=""
+          className="bg-[#F6F4F0] rounded-[12px] shadow-lg max-w-[720px] w-full p-8"
+        >
+          <div className="flex flex-col items-center gap-8">
+            <LottieOnce
+              src="/lotties/check-lfbLmjdZm0.json"
+              className="w-[120px] h-[120px]"
+            />
+            <div
+              className="text-center text-[#1C1D17] font-[var(--font-bitter)] font-medium"
+              style={{ fontSize: 34, fontFamily: 'var(--font-bitter), serif' }}
+            >
+              {`Amazing, you've repeated ${cards.length} words!`}
+            </div>
+            <div className="flex items-center justify-center gap-6">
+              <Link href="/home" className="btn-primary">Back to Home</Link>
+              <button
+                className="btn-secondary"
+                onClick={restartAll}
+              >
+                Repeat again
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
