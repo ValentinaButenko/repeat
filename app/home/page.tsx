@@ -7,12 +7,15 @@ import type { CardSet } from '../../db/types';
 import { SetRepo } from '../../repo/sets';
 import { UserSettingsRepo } from '../../repo/userSettings';
 import { useRouter } from 'next/navigation';
+import LanguageSelector from '../../components/LanguageSelector';
+import { ArrowRight } from '@phosphor-icons/react';
 
 export default function HomePage() {
   const router = useRouter();
   const [sets, setSets] = useState<CardSet[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [lastSetId, setLastSetId] = useState<string | null>(null);
+  const [userSettings, setUserSettings] = useState<{ learningLanguage: string; nativeLanguage: string } | null>(null);
   useEffect(() => {
     let mounted = true;
     SetRepo.list().then((s) => mounted && setSets(s));
@@ -26,7 +29,12 @@ export default function HomePage() {
   }, []);
   useEffect(() => {
     let mounted = true;
-    UserSettingsRepo.get().then((s) => mounted && setLastSetId(s?.lastStudiedSetId ?? null));
+    UserSettingsRepo.get().then((s) => {
+      if (mounted) {
+        setLastSetId(s?.lastStudiedSetId ?? null);
+        setUserSettings(s ? { learningLanguage: s.learningLanguage, nativeLanguage: s.nativeLanguage } : null);
+      }
+    });
     return () => { mounted = false; };
   }, []);
 
@@ -52,9 +60,26 @@ export default function HomePage() {
   }, [sets]);
   return (
     <div className="w-full pt-[80px] flex flex-col gap-6">
-      <div>
-        <h1>Repeat</h1>
-        <p className="subtitle mt-2">Let's repeat some words today.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1>Repeat</h1>
+          <p className="subtitle mt-2">Let's repeat some words today.</p>
+        </div>
+        {userSettings && (
+          <div className="flex items-center gap-2">
+            <LanguageSelector 
+              currentLanguage={userSettings.learningLanguage}
+              onLanguageChange={(newLanguage) => setUserSettings(prev => prev ? { ...prev, learningLanguage: newLanguage } : null)}
+              type="learning"
+            />
+            <ArrowRight size={24} color="#1C1D17" weight="regular" />
+            <LanguageSelector 
+              currentLanguage={userSettings.nativeLanguage}
+              onLanguageChange={(newLanguage) => setUserSettings(prev => prev ? { ...prev, nativeLanguage: newLanguage } : null)}
+              type="native"
+            />
+          </div>
+        )}
       </div>
 
       <div className="rounded-xl" style={{ background: 'rgba(255,255,255,0.3)' }}>
