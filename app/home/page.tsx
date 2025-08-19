@@ -8,7 +8,7 @@ import { SetRepo } from '../../repo/sets';
 import { UserSettingsRepo } from '../../repo/userSettings';
 import { useRouter } from 'next/navigation';
 import LanguageSelector from '../../components/LanguageSelector';
-import { ArrowRight } from '@phosphor-icons/react';
+import { ArrowRight, StackPlus, Plus } from '@phosphor-icons/react';
 
 export default function HomePage() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function HomePage() {
     };
   }, [sets]);
   return (
-    <div className="w-full pt-[80px] flex flex-col gap-6">
+    <div className="w-full pt-[72px] flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
           <h1>Repeat</h1>
@@ -120,18 +120,11 @@ export default function HomePage() {
           <h2 style={{ fontFamily: 'var(--font-bitter)', fontWeight: 700, fontSize: 24, color: '#1C1D17' }}>My library</h2>
           <div className="flex items-center gap-2">
             <Link href="/home/new-card" className="btn-secondary">
-              <svg width="24" height="24" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/>
-              </svg>
+              <Plus size={20} />
               <span>Add card</span>
             </Link>
             <Link href="/home/new-set" className="btn-secondary">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <rect x="2" y="7" width="14" height="10" rx="2" strokeWidth="1.8" />
-                <rect x="6" y="9" width="14" height="10" rx="2" strokeWidth="1.8" />
-                <line x1="18" y1="3" x2="18" y2="7" strokeWidth="1.8" strokeLinecap="round" />
-                <line x1="16" y1="5" x2="20" y2="5" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
+              <StackPlus size={20} />
               <span>Add set</span>
             </Link>
           </div>

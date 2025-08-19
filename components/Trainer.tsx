@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Modal from './Modal';
 import LottieOnce from './LottieOnce';
 import { UserSettingsRepo } from '../repo/userSettings';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 
 interface Props {
   scope: { setId?: UUID } | { all: true };
@@ -105,11 +106,7 @@ export default function Trainer({ scope, forceAll = false }: Props) {
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Header: title + restart */}
-      <div className="flex items-center justify-between">
-        <h1 className="m-0">Study cards</h1>
-        <button className="btn-secondary" onClick={onRestart}>↻ Restart</button>
-      </div>
+
 
       {/* Card */}
       <button
@@ -161,7 +158,7 @@ export default function Trainer({ scope, forceAll = false }: Props) {
       )}
 
       {/* Progress and navigation (fixed at bottom with 80px margin) */}
-      <div className="fixed bottom-[80px] left-1/2 -translate-x-1/2 w-full max-w-[800px] flex flex-col gap-3 px-6">
+      <div className="fixed bottom-[80px] left-[360px] right-[360px] flex flex-col gap-3 px-6">
         <div className="flex items-center justify-between w-full">
           <button
             className="btn-secondary"
@@ -171,7 +168,8 @@ export default function Trainer({ scope, forceAll = false }: Props) {
               setPhase('show');
             }}
           >
-            ← Previous
+            <CaretLeft size={20} color="#1C1D17" />
+            <span>Previous</span>
           </button>
           <div className="text-[16px] font-medium font-[var(--font-bitter)] text-[#1C1D17]">
             {Math.min(index + 1, total)} / {total}
@@ -184,7 +182,8 @@ export default function Trainer({ scope, forceAll = false }: Props) {
               setPhase('show');
             }}
           >
-            Next →
+            <span>Next</span>
+            <CaretRight size={20} color="#1C1D17" />
           </button>
         </div>
         <div className="w-full h-1" style={{ background: '#FFFFFF' }}>

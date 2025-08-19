@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { db } from '../../../db';
 import type { Card, CardSet } from '../../../db/types';
 import Breadcrumbs from '../../../components/Breadcrumbs';
+import { Plus, MagicWand } from '@phosphor-icons/react';
 
 export default function SetDetails() {
   const params = useParams<{ setId: string }>();
@@ -45,24 +46,20 @@ export default function SetDetails() {
     return c.front.toLowerCase().includes(q) || (c.back ?? '').toLowerCase().includes(q);
   });
   return (
-    <div className="mx-auto pt-[80px] max-w-[1280px] flex flex-col gap-6">
+    <div className="mx-auto pt-[72px] max-w-[1280px] flex flex-col gap-6">
       <Breadcrumbs />
       
       {/* Header - always visible */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-6">
         <h1 className="m-0">{set.name}</h1>
         {cards.length > 0 && (
           <div className="flex items-center gap-4">
             <Link href={`/sets/${setId}/new-card`} className="btn-secondary">
-              <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/>
-              </svg>
+              <Plus size={20} />
               <span>Add card</span>
             </Link>
             <button className="btn-secondary" disabled>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path d="M12 3l2 4 4 2-4 2-2 4-2 4-2-4-4-2 4-2 2-4z" strokeWidth="1.8"/>
-              </svg>
+              <MagicWand size={20} />
               <span>Generate cards</span>
             </button>
             <Link href={`/study/${setId}?restart=1`} className="btn-primary">
@@ -86,15 +83,11 @@ export default function SetDetails() {
           </h2>
           <div className="flex items-center gap-4">
             <Link href={`/sets/${setId}/new-card`} className="btn-secondary">
-              <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true">
-                <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/>
-              </svg>
+              <Plus size={20} />
               <span>Add card</span>
             </Link>
             <button className="btn-primary">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path d="M12 3l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z" strokeWidth="1.8"/>
-              </svg>
+              <MagicWand size={20} />
               <span>Generate cards</span>
             </button>
           </div>
