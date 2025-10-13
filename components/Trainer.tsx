@@ -6,7 +6,6 @@ import { getDueCards, review } from '../lib/fsrs';
 import { StudyEventsRepo } from '../repo/studyEvents';
 import Link from 'next/link';
 import Modal from './Modal';
-import LottieOnce from './LottieOnce';
 import { UserSettingsRepo } from '../repo/userSettings';
 import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 
@@ -21,8 +20,19 @@ export default function Trainer({ scope, forceAll = false }: Props) {
   const [cards, setCards] = useState<Card[]>([]);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('show');
+  const [successGif, setSuccessGif] = useState<string>('');
   const total = cards.length;
-  const progress = total === 0 ? 0 : (index / total) * 100;
+  const progress = total === 0 ? 0 : phase === 'done' ? 100 : (index / total) * 100;
+
+  // List of available success GIFs
+  const successGifs = [
+    '/success-gifs/celebration1.gif',
+    '/success-gifs/celebration2.gif',
+    '/success-gifs/celebration3.gif',
+    '/success-gifs/celebration4.gif',
+    '/success-gifs/celebration5.gif',
+    '/success-gifs/celebration6.gif',
+  ];
 
   useEffect(() => {
     async function load() {
@@ -58,6 +68,9 @@ export default function Trainer({ scope, forceAll = false }: Props) {
     }
     const nextIndex = index + 1;
     if (nextIndex >= cards.length) {
+      // Select random GIF when completing session
+      const randomGif = successGifs[Math.floor(Math.random() * successGifs.length)];
+      setSuccessGif(randomGif);
       setPhase('done');
     } else {
       setIndex(nextIndex);
@@ -111,12 +124,19 @@ export default function Trainer({ scope, forceAll = false }: Props) {
       {/* Card */}
       <button
         onClick={() => phase === 'show' ? onReveal() : undefined}
-        className="mx-auto w-[520px] h-[500px] rounded-[12px] p-10 flex flex-col items-center justify-center gap-8"
+        className="mx-auto w-[560px] h-[500px] rounded-[12px] p-10 flex flex-col items-center justify-center gap-8"
         style={{ background: 'rgba(255,255,255,0.3)' }}
       >
         {/* Word / Translation */}
         <div className="flex flex-col items-center justify-center gap-8 w-full">
-          <div className="text-[48px] font-medium text-[#1C1D17] text-center leading-tight font-[var(--font-bitter)] w-full">
+          <div 
+            className="text-[#1C1D17] text-center leading-tight w-full"
+            style={{ 
+              fontSize: '48px', 
+              fontFamily: 'var(--font-bitter)', 
+              fontWeight: 500 
+            }}
+          >
             {current.front}
           </div>
           {/* Separator */}
@@ -128,7 +148,14 @@ export default function Trainer({ scope, forceAll = false }: Props) {
               <div className="text-[16px] font-medium text-[#8D8E8B] font-[var(--font-bitter)]">Space</div>
             </div>
           ) : (
-            <div className="text-[48px] font-medium text-[#1C1D17] text-center leading-tight font-[var(--font-bitter)] w-full">
+            <div 
+              className="text-[#1C1D17] text-center leading-tight w-full"
+              style={{ 
+                fontSize: '48px', 
+                fontFamily: 'var(--font-bitter)', 
+                fontWeight: 500 
+              }}
+            >
               {current.back}
             </div>
           )}
@@ -158,7 +185,7 @@ export default function Trainer({ scope, forceAll = false }: Props) {
       )}
 
       {/* Progress and navigation (fixed at bottom with 80px margin) */}
-      <div className="fixed bottom-[80px] left-[360px] right-[360px] flex flex-col gap-3 px-6">
+      <div className="fixed bottom-[80px] left-[360px] right-[360px] flex flex-col gap-3 px-6 mt-8">
         <div className="flex items-center justify-between w-full">
           <button
             className="btn-secondary"
@@ -187,7 +214,10 @@ export default function Trainer({ scope, forceAll = false }: Props) {
           </button>
         </div>
         <div className="w-full h-1" style={{ background: '#FFFFFF' }}>
-          <div className="h-full" style={{ width: `${progress}%`, background: '#1C1D17' }} />
+          <div 
+            className="h-full transition-all duration-500 ease-out" 
+            style={{ width: `${progress}%`, background: '#1C1D17' }} 
+          />
         </div>
       </div>
       {showCompletion && (
@@ -196,10 +226,32 @@ export default function Trainer({ scope, forceAll = false }: Props) {
           className="bg-[#F6F4F0] rounded-[12px] shadow-lg max-w-[720px] w-full p-8"
         >
           <div className="flex flex-col items-center gap-8">
-            <LottieOnce
-              src="/lotties/check-lfbLmjdZm0.json"
-              className="w-[120px] h-[120px]"
-            />
+            {successGif ? (
+              <img
+                src={successGif}
+                alt="Success animation"
+                className="w-[320px] h-auto"
+                style={{ objectFit: 'contain' }}
+              />
+            ) : (
+              <div 
+                className="w-[120px] h-[120px] flex items-center justify-center rounded-full"
+                style={{ backgroundColor: '#289500' }}
+              >
+                <svg 
+                  width="60" 
+                  height="60" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="white" 
+                  strokeWidth="3" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20,6 9,17 4,12" />
+                </svg>
+              </div>
+            )}
             <div
               className="text-center text-[#1C1D17] font-[var(--font-bitter)] font-medium"
               style={{ fontSize: 34, fontFamily: 'var(--font-bitter), serif' }}

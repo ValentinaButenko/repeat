@@ -51,7 +51,18 @@ export default function LottieOnce({ src, className, style }: Props) {
     };
   }, [src]);
 
-  return <div ref={containerRef} className={className} style={style} />;
+  return (
+    <div 
+      ref={containerRef} 
+      className={className} 
+      style={{ 
+        ...style, 
+        minWidth: '120px', 
+        minHeight: '120px',
+        backgroundColor: 'transparent'
+      }} 
+    />
+  );
 }
 
 

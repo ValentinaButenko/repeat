@@ -38,19 +38,38 @@ export default function Breadcrumbs() {
         <nav className="flex items-center gap-2 text-[#1C1D17]" aria-label="Breadcrumb">
           <Link
             href="/home"
-            className="inline-flex items-center gap-2 text-base font-medium font-[var(--font-bitter)] no-underline hover:opacity-80 active:opacity-60"
+            className="inline-flex items-center gap-2 no-underline hover:opacity-80 active:opacity-60"
+            style={{ 
+              fontFamily: 'var(--font-bitter)', 
+              fontWeight: 500, 
+              fontSize: '16px' 
+            }}
           >
             Home
           </Link>
           <Dot size={16} className="text-[#8D8E8B]" />
           <Link
             href={`/sets/${setId}`}
-            className="inline-flex items-center gap-2 text-base font-medium font-[var(--font-bitter)] no-underline hover:opacity-80 active:opacity-60"
+            className="inline-flex items-center gap-2 no-underline hover:opacity-80 active:opacity-60"
+            style={{ 
+              fontFamily: 'var(--font-bitter)', 
+              fontWeight: 500, 
+              fontSize: '16px' 
+            }}
           >
             {setName ?? 'Set'}
           </Link>
           <Dot size={16} className="text-[#8D8E8B]" />
-          <span className="text-base font-medium font-[var(--font-bitter)] text-[#1C1D17]">Study cards</span>
+          <span 
+            className="text-[#1C1D17]"
+            style={{ 
+              fontFamily: 'var(--font-bitter)', 
+              fontWeight: 500, 
+              fontSize: '16px' 
+            }}
+          >
+            Study cards
+          </span>
         </nav>
       </div>
     );
@@ -66,7 +85,12 @@ export default function Breadcrumbs() {
     <div className="mb-2">
       <Link
         href={parent}
-        className="inline-flex items-center gap-2 text-base font-medium text-[#1C1D17] font-[var(--font-bitter)] no-underline hover:opacity-80 active:opacity-60"
+        className="inline-flex items-center gap-2 text-[#1C1D17] no-underline hover:opacity-80 active:opacity-60"
+        style={{ 
+          fontFamily: 'var(--font-bitter)', 
+          fontWeight: 500, 
+          fontSize: '16px' 
+        }}
       >
         <CaretLeft size={20} />
         <span>{label}</span>

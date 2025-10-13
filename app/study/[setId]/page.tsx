@@ -23,6 +23,11 @@ export default function StudySetPage({ params, searchParams }: { params: { setId
     <div className="mx-auto pt-[72px] max-w-[1280px] flex flex-col gap-6">
       <Breadcrumbs />
       
+      {/* Title */}
+      <div className="flex items-center justify-between mt-1">
+        <h1 className="m-0">Study {set?.name || ''}</h1>
+      </div>
+      
       <div className="mt-6">
         <Trainer scope={{ setId: params.setId as unknown as UUID }} forceAll={forceAll} />
       </div>
