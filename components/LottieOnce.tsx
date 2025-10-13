@@ -14,15 +14,35 @@ export default function LottieOnce({ src, className, style }: Props) {
     let mounted = true;
     let anim: any;
     async function load() {
-      const lottie = await import('lottie-web');
-      if (!mounted || !containerRef.current) return;
-      anim = lottie.loadAnimation({
-        container: containerRef.current,
-        renderer: 'svg',
-        loop: false,
-        autoplay: true,
-        path: src,
-      });
+      try {
+        const lottie = await import('lottie-web');
+        if (!mounted || !containerRef.current) return;
+        
+        console.log('Loading Lottie animation from:', src);
+        
+        anim = lottie.loadAnimation({
+          container: containerRef.current,
+          renderer: 'svg',
+          loop: false,
+          autoplay: true,
+          path: src,
+        });
+        
+        anim.addEventListener('data_ready', () => {
+          console.log('Lottie animation data ready');
+        });
+        
+        anim.addEventListener('complete', () => {
+          console.log('Lottie animation completed');
+        });
+        
+        anim.addEventListener('error', (error: any) => {
+          console.error('Lottie animation error:', error);
+        });
+        
+      } catch (error) {
+        console.error('Failed to load Lottie animation:', error);
+      }
     }
     load();
     return () => {
