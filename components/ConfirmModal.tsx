@@ -37,7 +37,7 @@ export default function ConfirmModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-[540px] h-[340px] bg-[#F6F4F0] rounded-lg p-8 flex flex-col">
+      <div className="w-[540px] h-[252px] bg-[#F6F4F0] rounded-lg p-8 flex flex-col">
         <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <h2 className="font-bitter font-bold text-2xl" style={{ color: '#1C1D17' }}>
             {title}

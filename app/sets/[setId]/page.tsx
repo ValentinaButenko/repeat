@@ -1,11 +1,63 @@
 "use client";
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { db } from '../../../db';
 import type { Card, CardSet } from '../../../db/types';
 import Breadcrumbs from '../../../components/Breadcrumbs';
-import { Plus, MagicWand } from '@phosphor-icons/react';
+import IconButton from '../../../components/IconButton';
+import ConfirmModal from '../../../components/ConfirmModal';
+import { CardRepo } from '../../../repo/cards';
+import { Plus, MagicWand, TrashSimple } from '@phosphor-icons/react';
+
+interface CardComponentProps {
+  card: Card;
+  setId: string;
+  onDelete: (cardId: string, cardFront: string) => void;
+}
+
+function CardComponent({ card, setId, onDelete }: CardComponentProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/sets/${setId}/edit-card/${card.id}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete(card.id, card.front);
+  };
+
+  return (
+    <div
+      className="relative rounded-xl p-4 transition-all bg-white/30 hover:bg-white/45 active:translate-y-px cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
+    >
+      <div className="text-[#1C1D17]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 600, fontSize: 16 }}>
+        {card.front}
+      </div>
+      <div className="mt-2 text-[#5B5B55]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 400, fontSize: 12 }}>
+        {card.back}
+      </div>
+      <div 
+        className="absolute top-2 right-2"
+        onClick={handleDeleteClick}
+      >
+        <IconButton
+          onClick={handleDeleteClick}
+          aria-label={`Delete card "${card.front}"`}
+          visible={isHovered}
+        >
+          <TrashSimple size={20} />
+        </IconButton>
+      </div>
+    </div>
+  );
+}
 
 export default function SetDetails() {
   const params = useParams<{ setId: string }>();
@@ -13,6 +65,7 @@ export default function SetDetails() {
   const [set, setSet] = useState<CardSet | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [query, setQuery] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ cardId: string; cardFront: string } | null>(null);
 
   async function load() {
     const id = params.setId;
@@ -37,6 +90,29 @@ export default function SetDetails() {
     window.addEventListener('cards:changed', onChanged as EventListener);
     return () => window.removeEventListener('cards:changed', onChanged as EventListener);
   }, [params.setId]);
+
+  function handleDeleteCard(cardId: string, cardFront: string) {
+    setDeleteConfirm({ cardId, cardFront });
+  }
+
+  async function confirmDelete() {
+    if (!deleteConfirm) return;
+    
+    try {
+      await CardRepo.remove(deleteConfirm.cardId);
+      // Refresh the cards list
+      await load();
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error('Failed to delete card:', error);
+      alert('Failed to delete card. Please try again.');
+      setDeleteConfirm(null);
+    }
+  }
+
+  function cancelDelete() {
+    setDeleteConfirm(null);
+  }
 
   if (!set) return <div className="p-6">Set not found.</div>;
   const setId = params.setId;
@@ -142,22 +218,28 @@ export default function SetDetails() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((c) => (
-                <Link
+                <CardComponent
                   key={c.id}
-                  href={`/sets/${setId}/edit-card/${c.id}`}
-                  className="rounded-xl p-4 transition-all bg-white/30 hover:bg-white/45 active:translate-y-px"
-                >
-                  <div className="text-[#1C1D17]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 600, fontSize: 16 }}>
-                    {c.front}
-                  </div>
-                  <div className="mt-2 text-[#5B5B55]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 400, fontSize: 12 }}>
-                    {c.back}
-                  </div>
-                </Link>
+                  card={c}
+                  setId={setId}
+                  onDelete={handleDeleteCard}
+                />
               ))}
             </div>
           )}
         </>
+      )}
+
+      {deleteConfirm && (
+        <ConfirmModal
+          title="Delete card"
+          message={`Are you sure you want to delete "${deleteConfirm.cardFront}"?`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+          isDestructive={true}
+        />
       )}
     </div>
   );
