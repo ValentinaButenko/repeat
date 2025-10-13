@@ -8,7 +8,62 @@ import { SetRepo } from '../../repo/sets';
 import { UserSettingsRepo } from '../../repo/userSettings';
 import { useRouter } from 'next/navigation';
 import LanguageSelector from '../../components/LanguageSelector';
-import { ArrowRight, StackPlus, Plus } from '@phosphor-icons/react';
+import IconButton from '../../components/IconButton';
+import ConfirmModal from '../../components/ConfirmModal';
+import { ArrowRight, StackPlus, Plus, TrashSimple } from '@phosphor-icons/react';
+
+interface SetCardProps {
+  set: CardSet;
+  count: number;
+  onDelete: (setId: string, setName: string) => void;
+}
+
+function SetCard({ set, count, onDelete }: SetCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/sets/${set.id}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete(set.id, set.name);
+  };
+
+  return (
+    <div
+      className="relative rounded-xl p-4 transition-all bg-white/30 hover:bg-white/45 active:translate-y-px cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
+    >
+      <div style={{ fontFamily: 'var(--font-bitter)', fontWeight: 600, fontSize: 18, color: '#1C1D17' }}>
+        {set.name}
+      </div>
+      <div className="mt-3" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 400, fontSize: 14, color: '#5B5B55' }}>
+        {(() => {
+          if (count === 0) return 'No cards';
+          if (count === 1) return '1 card';
+          return `${count} cards`;
+        })()}
+      </div>
+      <div 
+        className="absolute top-2 right-2"
+        onClick={handleDeleteClick}
+      >
+        <IconButton
+          onClick={handleDeleteClick}
+          aria-label={`Delete set "${set.name}"`}
+          visible={isHovered}
+        >
+          <TrashSimple size={20} />
+        </IconButton>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   const router = useRouter();
@@ -16,6 +71,7 @@ export default function HomePage() {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [lastSetId, setLastSetId] = useState<string | null>(null);
   const [userSettings, setUserSettings] = useState<{ learningLanguage: string; nativeLanguage: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ setId: string; setName: string } | null>(null);
   useEffect(() => {
     let mounted = true;
     SetRepo.list().then((s) => mounted && setSets(s));
@@ -58,6 +114,30 @@ export default function HomePage() {
       canceled = true;
     };
   }, [sets]);
+
+  function handleDeleteSet(setId: string, setName: string) {
+    setDeleteConfirm({ setId, setName });
+  }
+
+  async function confirmDelete() {
+    if (!deleteConfirm) return;
+    
+    try {
+      await SetRepo.remove(deleteConfirm.setId);
+      // Refresh the sets list
+      const updatedSets = await SetRepo.list();
+      setSets(updatedSets);
+      setDeleteConfirm(null);
+    } catch (error) {
+      console.error('Failed to delete set:', error);
+      alert('Failed to delete set. Please try again.');
+      setDeleteConfirm(null);
+    }
+  }
+
+  function cancelDelete() {
+    setDeleteConfirm(null);
+  }
   return (
     <div className="w-full pt-[72px] flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -134,27 +214,28 @@ export default function HomePage() {
         ) : (
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sets.map((s) => (
-              <Link
+              <SetCard
                 key={s.id}
-                href={`/sets/${s.id}`}
-                className="rounded-xl p-4 transition-all bg-white/30 hover:bg-white/45 active:translate-y-px"
-              >
-                <div style={{ fontFamily: 'var(--font-bitter)', fontWeight: 600, fontSize: 18, color: '#1C1D17' }}>
-                  {s.name}
-                </div>
-                <div className="mt-3" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 400, fontSize: 14, color: '#5B5B55' }}>
-                  {(() => {
-                    const c = counts[s.id] ?? 0;
-                    if (c === 0) return 'No cards';
-                    if (c === 1) return '1 card';
-                    return `${c} cards`;
-                  })()}
-                </div>
-              </Link>
+                set={s}
+                count={counts[s.id] ?? 0}
+                onDelete={handleDeleteSet}
+              />
             ))}
           </div>
         )}
       </div>
+      
+      {deleteConfirm && (
+        <ConfirmModal
+          title="Delete set"
+          message={`Are you sure you want to delete "${deleteConfirm.setName}"? This will also delete all cards in this set.`}
+          confirmText="Delete"
+          cancelText="Cancel"
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+          isDestructive={true}
+        />
+      )}
     </div>
   );
 }

@@ -49,11 +49,58 @@ export default function SetDetails() {
     <div className="mx-auto pt-[72px] max-w-[1280px] flex flex-col gap-6">
       <Breadcrumbs />
       
-      {/* Header - always visible */}
-      <div className="flex items-center justify-between mt-6">
+      {/* Title and Study button row */}
+      <div className="flex items-center justify-between mt-1">
         <h1 className="m-0">{set.name}</h1>
         {cards.length > 0 && (
-          <div className="flex items-center gap-4">
+          <Link href={`/study/${setId}?restart=1`} className="btn-primary">
+            <span>Study</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </Link>
+        )}
+      </div>
+
+      {/* Search and action buttons row */}
+      {cards.length > 0 && (
+        <div className="flex items-center justify-between">
+          {/* Search bar */}
+          <div className="relative flex-1 max-w-md">
+            <style jsx>{`
+              .search-input::placeholder {
+                color: #60615D !important;
+              }
+              .search-input:focus,
+              .search-input:active {
+                outline: none !important;
+                border: none !important;
+                box-shadow: none !important;
+              }
+            `}</style>
+            <input
+              className="input border-none outline-none search-input"
+              placeholder="Search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{ 
+                paddingLeft: '40px', 
+                background: 'transparent', 
+                color: '#60615D'
+              }}
+              onFocus={(e) => e.target.style.outline = 'none'}
+              onBlur={(e) => e.target.style.outline = 'none'}
+            />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: '#60615D' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" strokeWidth="1.8" />
+                <line x1="16.65" y1="16.65" x2="21" y2="21" strokeWidth="1.8" />
+              </svg>
+            </div>
+          </div>
+          
+          {/* Action buttons */}
+          <div className="flex items-center gap-3">
             <Link href={`/sets/${setId}/new-card`} className="btn-secondary">
               <Plus size={20} />
               <span>Add card</span>
@@ -62,15 +109,9 @@ export default function SetDetails() {
               <MagicWand size={20} />
               <span>Generate cards</span>
             </button>
-            <Link href={`/study/${setId}?restart=1`} className="btn-primary">
-              <span>Study</span>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </Link>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {cards.length === 0 ? (
         // Empty state when no cards exist
@@ -95,23 +136,6 @@ export default function SetDetails() {
       ) : (
         // Normal state when cards exist
         <>
-
-          {/* Search */}
-          <div className="relative">
-            <input
-              className="input pl-12"
-              placeholder="Search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D8E8B]">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" strokeWidth="1.8" />
-                <line x1="16.65" y1="16.65" x2="21" y2="21" strokeWidth="1.8" />
-              </svg>
-            </div>
-          </div>
-
           {/* Cards grid */}
           {filtered.length === 0 ? (
             <div className="mt-6 text-sm text-gray-600">No matching cards.</div>
