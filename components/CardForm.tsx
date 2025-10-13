@@ -28,6 +28,7 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
   const [candidates, setCandidates] = useState<string[] | null>(null);
   const [isMac, setIsMac] = useState(false);
   const [frontInputEl, setFrontInputEl] = useState<HTMLInputElement | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setError(null);
@@ -88,7 +89,14 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
       if (resetOnSave) {
         setFront('');
         setBack('');
+        setCandidates(null);
+        setError(null);
       }
+      
+      // Show success message
+      setSuccessMessage(`"${front}" card is created.`);
+      setTimeout(() => setSuccessMessage(null), 4000);
+      
       // Focus/select learn input for rapid entry
       setTimeout(() => {
         if (frontInputEl) {
@@ -112,6 +120,11 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
     if (front.trim().length >= 2) {
       const id = setTimeout(() => autoTranslate(), 400);
       return () => clearTimeout(id);
+    } else if (front.trim().length === 0) {
+      // Clear translation when user deletes the word
+      setBack('');
+      setCandidates(null);
+      setError(null);
     }
   }, [front]);
 
@@ -185,23 +198,40 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
           style={{ height: 140, padding: 20 }}
         />
       )}
-      <div className="flex gap-2 justify-end mt-auto">
-        {onCancel && (
-          <button type="button" onClick={onCancel} className="btn-secondary">
-            <span>Close</span>
-            <span style={{ color: '#A4A5A2' }}>Esc</span>
-          </button>
-        )}
-        <button type="submit" className="btn-primary" style={{ width: 200, height: 52 }}>
-          {mode === 'create' ? (
-            <>
-              <span>Create</span>
-              <span style={{ color: '#F6F4F0', opacity: 0.6 }}>{isMac ? '⌘ + ↵' : 'Ctrl + ↵'}</span>
-            </>
-          ) : (
-            'Save'
+      <div className="flex items-center justify-between mt-auto">
+        <div className="flex items-center">
+          {successMessage && (
+            <span 
+              className="text-green-600"
+              style={{ 
+                fontFamily: 'var(--font-bitter)', 
+                fontWeight: 500, 
+                fontSize: 16 
+              }}
+            >
+              {successMessage}
+            </span>
           )}
-        </button>
+        </div>
+        
+        <div className="flex gap-2">
+          {onCancel && (
+            <button type="button" onClick={onCancel} className="btn-secondary">
+              <span>Close</span>
+              <span style={{ color: '#A4A5A2' }}>Esc</span>
+            </button>
+          )}
+          <button type="submit" className="btn-primary" style={{ width: 200, height: 52 }}>
+            {mode === 'create' ? (
+              <>
+                <span>Create</span>
+                <span style={{ color: '#F6F4F0', opacity: 0.6 }}>{isMac ? '⌘ + ↵' : 'Ctrl + ↵'}</span>
+              </>
+            ) : (
+              'Save'
+            )}
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -19,6 +19,7 @@ function Inner() {
           onCancel={() => router.back()}
           cancelLabel="Close"
           initial={{ setId: setId as unknown as UUID }}
+          resetOnSave={true}
         />
       </div>
     </AppModal>
