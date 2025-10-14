@@ -37,10 +37,10 @@ function CardComponent({ card, setId, onDelete }: CardComponentProps) {
       onMouseLeave={() => setIsHovered(false)}
       onClick={handleCardClick}
     >
-      <div className="text-[#1C1D17]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 600, fontSize: 16 }}>
+      <div className="text-[#1C1D17]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 600, fontSize: 18 }}>
         {card.front}
       </div>
-      <div className="mt-2 text-[#5B5B55]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 400, fontSize: 12 }}>
+      <div className="mt-1 text-[#5B5B55]" style={{ fontFamily: 'var(--font-bitter)', fontWeight: 400, fontSize: 14 }}>
         {card.back}
       </div>
       <div 

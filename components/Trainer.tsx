@@ -158,11 +158,11 @@ export default function Trainer({ scope, forceAll = false }: Props) {
                 </div>
               ) : (
                 <div 
-                  className="text-[#1C1D17] text-center leading-tight w-full"
+                  className="text-[#5B5B55] text-center leading-tight w-full"
                   style={{ 
-                    fontSize: '48px', 
+                    fontSize: '24px', 
                     fontFamily: 'var(--font-bitter)', 
-                    fontWeight: 500 
+                    fontWeight: 400 
                   }}
                 >
                   {current.back}
