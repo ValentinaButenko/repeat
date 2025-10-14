@@ -181,10 +181,10 @@ export default function SetDetails() {
               <Plus size={20} />
               <span>Add card</span>
             </Link>
-            <button className="btn-secondary" disabled>
+            <Link href={`/sets/${setId}/generate-cards`} className="btn-secondary">
               <MagicWand size={20} />
               <span>Generate cards</span>
-            </button>
+            </Link>
           </div>
         </div>
       )}
@@ -203,10 +203,10 @@ export default function SetDetails() {
               <Plus size={20} />
               <span>Add card</span>
             </Link>
-            <button className="btn-primary">
+            <Link href={`/sets/${setId}/generate-cards`} className="btn-primary">
               <MagicWand size={20} />
               <span>Generate cards</span>
-            </button>
+            </Link>
           </div>
         </div>
       ) : (
