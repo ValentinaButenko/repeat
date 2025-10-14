@@ -28,7 +28,7 @@ export default function StudySetPage({ params, searchParams }: { params: { setId
         <h1 className="m-0">Study {set?.name || ''}</h1>
       </div>
       
-      <div className="mt-6">
+      <div style={{ marginTop: '40px' }}>
         <Trainer scope={{ setId: params.setId as unknown as UUID }} forceAll={forceAll} />
       </div>
     </div>

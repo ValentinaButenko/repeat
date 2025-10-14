@@ -8,7 +8,7 @@ export default function StudyAllPage({ searchParams }: { searchParams: Promise<{
   return (
     <div className="mx-auto pt-[72px] max-w-[1280px]">
       <Breadcrumbs />
-      <div className="mt-6">
+      <div style={{ marginTop: '40px' }}>
         <Trainer scope={{ all: true }} forceAll={forceAll} />
       </div>
     </div>

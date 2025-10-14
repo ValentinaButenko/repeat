@@ -6,6 +6,7 @@ import { languageToCode } from '../lib/languages';
 import SetPicker from './SetPicker';
 import { normalizeFront } from '../repo/normalize';
 import { CardRepo, safeCreateCard } from '../repo/cards';
+import { db } from '../db';
 import type { UUID, Card } from '../db/types';
 
 interface Props {
@@ -28,9 +29,11 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
   const [candidates, setCandidates] = useState<string[] | null>(null);
   const [frontInputEl, setFrontInputEl] = useState<HTMLInputElement | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [duplicateError, setDuplicateError] = useState<string | null>(null);
 
   useEffect(() => {
     setError(null);
+    setDuplicateError(null);
   }, [setId, front]);
 
   async function autoTranslate() {
@@ -68,7 +71,11 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
     }
     const nf = normalizeFront(front);
     if (await CardRepo.existsInSet(setId, nf)) {
-      setError('A card with this front already exists in the selected set.');
+      // Get the set name to show in the error message
+      const set = await db.sets.get(setId);
+      const setName = set?.name || 'this set';
+      setDuplicateError(`"${front}" already exists in the "${setName}"`);
+      setTimeout(() => setDuplicateError(null), 4000);
       return;
     }
     try {
@@ -83,6 +90,7 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
         setBack('');
         setCandidates(null);
         setError(null);
+        setDuplicateError(null);
       }
       
       // Show success message
@@ -202,6 +210,18 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
               }}
             >
               {successMessage}
+            </span>
+          )}
+          {duplicateError && (
+            <span 
+              style={{ 
+                fontFamily: 'var(--font-bitter)', 
+                fontWeight: 500, 
+                fontSize: 16,
+                color: '#EE683F'
+              }}
+            >
+              {duplicateError}
             </span>
           )}
         </div>

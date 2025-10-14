@@ -127,14 +127,14 @@ export default function Trainer({ scope, forceAll = false }: Props) {
   const showCompletion = phase === 'done';
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col">
       {!showCompletion && (
         <>
-          {/* Card */}
+          {/* Card - takes available space */}
           <button
             onClick={() => phase === 'show' ? onReveal() : undefined}
-            className="mx-auto w-[560px] h-[500px] rounded-[12px] p-10 flex flex-col items-center justify-center gap-8"
-            style={{ background: 'rgba(255,255,255,0.3)' }}
+            className="mx-auto w-[560px] rounded-[12px] p-10 flex flex-col items-center justify-center gap-8"
+            style={{ background: 'rgba(255,255,255,0.3)', minHeight: '400px' }}
           >
             {/* Word / Translation */}
             <div className="flex flex-col items-center justify-center gap-8 w-full">
@@ -150,26 +150,31 @@ export default function Trainer({ scope, forceAll = false }: Props) {
               </div>
               {/* Separator */}
               <div className="w-1/2 h-px" style={{ background: '#FFFFFF' }} />
-              {/* Info labels or translation */}
-              {phase === 'show' ? (
-                <div className="flex flex-col items-center gap-2">
-                  <div className="text-[16px] font-medium text-[#1C1D17] font-[var(--font-bitter)]">Click to reveal</div>
-                  <div className="text-[16px] font-medium text-[#8D8E8B] font-[var(--font-bitter)]">Space</div>
-                </div>
-              ) : (
-                <div 
-                  className="text-[#5B5B55] text-center leading-tight w-full"
-                  style={{ 
-                    fontSize: '24px', 
-                    fontFamily: 'var(--font-bitter)', 
-                    fontWeight: 400 
-                  }}
-                >
-                  {current.back}
-                </div>
-              )}
+              {/* Info labels or translation - fixed height to prevent jumping */}
+              <div className="flex items-center justify-center w-full" style={{ minHeight: '80px' }}>
+                {phase === 'show' ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="text-[16px] font-medium text-[#1C1D17] font-[var(--font-bitter)]">Click to reveal</div>
+                    <div className="text-[16px] font-medium text-[#8D8E8B] font-[var(--font-bitter)]">Space</div>
+                  </div>
+                ) : (
+                  <div 
+                    className="text-[#5B5B55] text-center leading-tight w-full"
+                    style={{ 
+                      fontSize: '24px', 
+                      fontFamily: 'var(--font-bitter)', 
+                      fontWeight: 400 
+                    }}
+                  >
+                    {current.back}
+                  </div>
+                )}
+              </div>
             </div>
           </button>
+
+          {/* 40px spacing */}
+          <div style={{ height: '40px' }} />
 
           {/* Rating buttons */}
           {phase === 'reveal' && (
@@ -193,35 +198,40 @@ export default function Trainer({ scope, forceAll = false }: Props) {
             </div>
           )}
 
-          {/* Progress and navigation (fixed at bottom with 80px margin) */}
-          <div className="fixed bottom-[80px] left-[360px] right-[360px] flex flex-col gap-3 px-6 mt-8">
-            <div className="flex items-center justify-between w-full">
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  const prev = Math.max(0, index - 1);
-                  setIndex(prev);
-                  setPhase('show');
-                }}
-              >
-                <CaretLeft size={20} color="#1C1D17" />
-                <span>Previous</span>
-              </button>
-              <div className="text-[16px] font-medium font-[var(--font-bitter)] text-[#1C1D17]">
-                {Math.min(index + 1, total)} / {total}
-              </div>
-              <button
-                className="btn-secondary"
-                onClick={() => {
-                  const next = Math.min(total - 1, index + 1);
-                  setIndex(next);
-                  setPhase('show');
-                }}
-              >
-                <span>Next</span>
-                <CaretRight size={20} color="#1C1D17" />
-              </button>
+          {/* Spacer to prevent overlap with fixed bottom elements */}
+          <div style={{ height: '40px' }} />
+
+          {/* Previous/Next navigation and counter - FIXED at bottom */}
+          <div className="fixed bottom-[92px] left-[360px] right-[360px] flex items-center justify-between">
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                const prev = Math.max(0, index - 1);
+                setIndex(prev);
+                setPhase('show');
+              }}
+            >
+              <CaretLeft size={20} color="#1C1D17" />
+              <span>Previous</span>
+            </button>
+            <div className="text-[16px] font-medium font-[var(--font-bitter)] text-[#1C1D17]">
+              {Math.min(index + 1, total)} / {total}
             </div>
+            <button
+              className="btn-secondary"
+              onClick={() => {
+                const next = Math.min(total - 1, index + 1);
+                setIndex(next);
+                setPhase('show');
+              }}
+            >
+              <span>Next</span>
+              <CaretRight size={20} color="#1C1D17" />
+            </button>
+          </div>
+
+          {/* Progress bar - FIXED at bottom */}
+          <div className="fixed bottom-[80px] left-[360px] right-[360px]">
             <div className="w-full h-1" style={{ background: '#FFFFFF' }}>
               <div 
                 className="h-full transition-all duration-500 ease-out" 
