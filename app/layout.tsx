@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Bitter } from "next/font/google";
 import "./globals.css";
+import { GenerationProvider } from "../components/GenerationContext";
+import ClientWrapper from "../components/ClientWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,9 +35,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${bitter.variable} antialiased bg-[#E8E2D9]`}
       >
-        <div className="px-[360px]">
-          {children}
-        </div>
+        <GenerationProvider>
+          <div className="px-[360px]">
+            <ClientWrapper>
+              {children}
+            </ClientWrapper>
+          </div>
+        </GenerationProvider>
       </body>
     </html>
   );

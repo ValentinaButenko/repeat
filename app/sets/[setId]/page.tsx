@@ -8,7 +8,7 @@ import Breadcrumbs from '../../../components/Breadcrumbs';
 import IconButton from '../../../components/IconButton';
 import ConfirmModal from '../../../components/ConfirmModal';
 import { CardRepo } from '../../../repo/cards';
-import { Plus, MagicWand, TrashSimple } from '@phosphor-icons/react';
+import { Plus, MagicWand, TrashSimple, Play } from '@phosphor-icons/react';
 
 interface CardComponentProps {
   card: Card;
@@ -129,11 +129,9 @@ export default function SetDetails() {
       <div className="flex items-center justify-between mt-1">
         <h1 className="m-0">{set.name}</h1>
         {cards.length > 0 && (
-          <Link href={`/study/${setId}?restart=1`} className="btn-primary">
+          <Link href={`/study/${setId}?restart=1`} className="btn-primary" style={{ width: 'auto', paddingLeft: '24px', paddingRight: '24px' }}>
             <span>Study</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z" />
-            </svg>
+            <Play size={20} weight="fill" />
           </Link>
         )}
       </div>

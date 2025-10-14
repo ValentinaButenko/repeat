@@ -4,42 +4,54 @@ import { useRouter } from 'next/navigation';
 import Modal from './Modal';
 import { safeCreateCard } from '../repo/cards';
 import { UserSettingsRepo } from '../repo/userSettings';
+import { useGeneration } from './GenerationContext';
 import type { UUID } from '../db/types';
 
 interface Props {
   setId: string;
+  setName: string;
   onGenerated?: () => void;
 }
 
-export default function CardGenerationModal({ setId, onGenerated }: Props) {
+export default function CardGenerationModal({ setId, setName, onGenerated }: Props) {
   const router = useRouter();
+  const { showProgress, updateProgress, hideProgress } = useGeneration();
   const [cardAmount, setCardAmount] = useState<50 | 100 | 150 | 200>(50);
   const [complexity, setComplexity] = useState<'Beginner' | 'Intermediate' | 'Advanced'>('Beginner');
   const [prompt, setPrompt] = useState('Basic words for everyday use');
-  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [generationProgress, setGenerationProgress] = useState<{ current: number; total: number } | null>(null);
 
-  // Generate cards using AI
-  const generateCardsWithAI = async (amount: number, complexity: string, prompt: string) => {
-    // Get user language settings
-    const userSettings = await UserSettingsRepo.get();
-    if (!userSettings) {
-      throw new Error('Language settings not found. Please configure your languages in settings.');
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      setError('Please provide a topic or prompt');
+      return;
     }
 
-    const nativeLanguage = userSettings.nativeLanguage;
-    const learningLanguage = userSettings.learningLanguage;
+    // Close modal immediately and show progress popover
+    router.back();
     
-    // Call the API to generate words with AI
-    setGenerationProgress({ current: 0, total: amount });
-    
+    // Show progress popover
+    showProgress(0, cardAmount, setName, () => {
+      // Stop generation - for now just hide progress
+      hideProgress();
+    });
+
     try {
+      // Get user language settings
+      const userSettings = await UserSettingsRepo.get();
+      if (!userSettings) {
+        throw new Error('Language settings not found. Please configure your languages in settings.');
+      }
+
+      const nativeLanguage = userSettings.nativeLanguage;
+      const learningLanguage = userSettings.learningLanguage;
+      
+      // Start streaming generation
       const response = await fetch('/api/generate-cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount,
+          amount: cardAmount,
           complexity,
           prompt,
           nativeLanguage,
@@ -53,67 +65,99 @@ export default function CardGenerationModal({ setId, onGenerated }: Props) {
         throw new Error(errorData.error || 'Failed to generate cards');
       }
 
-      const data = await response.json();
-      const generatedCards = data.words || [];
+      // Process streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let createdCount = 0;
 
-      if (generatedCards.length === 0) {
-        throw new Error('No words generated. Please try a different prompt or topic.');
+      if (!reader) {
+        throw new Error('Response body is not readable');
       }
 
-      setGenerationProgress({ current: generatedCards.length, total: amount });
-      return generatedCards;
-    } catch (error) {
-      console.error('AI generation error:', error);
-      throw error;
-    }
-  };
+      // Helper to trigger UI refresh
+      const triggerRefresh = () => {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('cards:changed', { detail: { setId } }));
+        }
+      };
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      setError('Please provide a topic or prompt');
-      return;
-    }
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
 
-    setIsGenerating(true);
-    setError(null);
-    setGenerationProgress(null);
+        // Decode the chunk and add to buffer
+        buffer += decoder.decode(value, { stream: true });
 
-    try {
-      // Generate cards with AI
-      const generatedCards = await generateCardsWithAI(cardAmount, complexity, prompt);
-      
-      // Create cards in the database
-      const createdCards = [];
-      for (const cardData of generatedCards) {
-        try {
-          const card = await safeCreateCard(
-            setId as UUID,
-            cardData.front,
-            cardData.back,
-            `Generated from prompt: "${prompt}"`
-          );
-          createdCards.push(card);
-        } catch (error) {
-          // Skip duplicate cards
-          if (error instanceof Error && error.message === 'DUPLICATE_FRONT_IN_SET') {
-            continue;
+        // Process complete messages
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || ''; // Keep incomplete message in buffer
+
+        for (const line of lines) {
+          if (!line.trim() || !line.startsWith('data: ')) continue;
+
+          const data = line.slice(6); // Remove 'data: ' prefix
+
+          if (data === '[DONE]') {
+            console.log(`Generation complete. Created ${createdCount} cards.`);
+            triggerRefresh(); // Final refresh to ensure all cards are shown
+            hideProgress();
+            if (onGenerated) {
+              onGenerated();
+            }
+            return;
           }
-          throw error;
+
+          try {
+            const word = JSON.parse(data);
+            
+            if (word.error) {
+              throw new Error(word.error);
+            }
+
+            // Create card immediately as it arrives
+            try {
+              await safeCreateCard(
+                setId as UUID,
+                word.front,
+                word.back,
+                `Generated from prompt: "${prompt}"`
+              );
+              createdCount++;
+              
+              // Update progress
+              updateProgress(createdCount);
+              
+              // Trigger UI update every 3 cards or on first card
+              if (createdCount === 1 || createdCount % 3 === 0) {
+                triggerRefresh();
+              }
+            } catch (error) {
+              // Skip duplicate cards silently
+              if (error instanceof Error && error.message === 'DUPLICATE_FRONT_IN_SET') {
+                console.log('Skipping duplicate card:', word.front);
+                continue;
+              }
+              throw error;
+            }
+          } catch (parseError) {
+            console.error('Failed to parse word data:', parseError);
+          }
         }
       }
-
-      console.log(`Generated ${createdCards.length} out of ${cardAmount} cards`);
       
-      // Close modal and notify parent
-      router.back();
+      // If we get here without [DONE], generation ended prematurely
+      console.log(`Generation ended. Created ${createdCount} cards.`);
+      triggerRefresh(); // Final refresh to ensure all cards are shown
+      hideProgress();
       if (onGenerated) {
         onGenerated();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to generate cards. Please try again.';
-      setError(errorMessage);
-    } finally {
-      setIsGenerating(false);
+      console.error('Generation failed:', err);
+      hideProgress();
+      // Could show error toast here in the future
     }
   };
 
@@ -189,13 +233,6 @@ export default function CardGenerationModal({ setId, onGenerated }: Props) {
           />
         </div>
 
-        {/* Progress Message */}
-        {generationProgress && (
-          <div className="text-[#1C1D17] text-sm" style={{ fontFamily: 'var(--font-bitter)' }}>
-            Generating cards... {generationProgress.current} of {generationProgress.total}
-          </div>
-        )}
-
         {/* Error Message */}
         {error && (
           <div className="text-red-600 text-sm" style={{ fontFamily: 'var(--font-bitter)' }}>
@@ -209,21 +246,15 @@ export default function CardGenerationModal({ setId, onGenerated }: Props) {
             onClick={handleCancel}
             className="text-[#1C1D17] hover:text-gray-600 transition-colors"
             style={{ fontFamily: 'var(--font-bitter)', fontWeight: 500, fontSize: 16 }}
-            disabled={isGenerating}
           >
             Cancel
           </button>
           <button
             onClick={handleGenerate}
-            disabled={isGenerating}
-            className={`px-6 py-3 rounded-lg font-medium transition-all ${
-              isGenerating
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-[#1C1D17] text-white hover:bg-gray-800'
-            }`}
+            className="px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2 bg-[#1C1D17] text-white hover:bg-gray-800"
             style={{ fontFamily: 'var(--font-bitter)', fontWeight: 500, fontSize: 16 }}
           >
-            {isGenerating ? (generationProgress ? 'Generating...' : 'Generating...') : 'Generate'}
+            Generate
           </button>
         </div>
       </div>

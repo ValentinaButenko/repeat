@@ -26,20 +26,12 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<string[] | null>(null);
-  const [isMac, setIsMac] = useState(false);
   const [frontInputEl, setFrontInputEl] = useState<HTMLInputElement | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setError(null);
   }, [setId, front]);
-
-  useEffect(() => {
-    if (typeof navigator !== 'undefined') {
-      const ua = navigator.userAgent || navigator.platform || '';
-      setIsMac(/Mac|iPhone|iPad|iPod/i.test(ua));
-    }
-  }, []);
 
   async function autoTranslate() {
     setLoading(true);
@@ -129,7 +121,7 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
   }, [front]);
 
   function onKeyDown(e: React.KeyboardEvent) {
-    if ((isMac ? e.metaKey : e.ctrlKey) && (e.key === 'Enter')) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       void createCard();
     }
@@ -221,11 +213,20 @@ export default function CardForm({ initial, mode, onSaved, hideSetPicker, fixedS
               <span style={{ color: '#A4A5A2' }}>Esc</span>
             </button>
           )}
-          <button type="submit" className="btn-primary" style={{ width: 200, height: 52 }}>
+          <button 
+            type="submit" 
+            className="btn-primary" 
+            style={{ 
+              paddingLeft: '24px', 
+              paddingRight: '24px', 
+              width: 'auto', 
+              height: 52 
+            }}
+          >
             {mode === 'create' ? (
               <>
                 <span>Create</span>
-                <span style={{ color: '#F6F4F0', opacity: 0.6 }}>{isMac ? '⌘ + ↵' : 'Ctrl + ↵'}</span>
+                <span className="ml-2" style={{ color: '#9F9E9A' }}>↵</span>
               </>
             ) : (
               'Save'

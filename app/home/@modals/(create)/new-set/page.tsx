@@ -17,9 +17,19 @@ export default function NewSetModal() {
     }
   }, []);
 
+  async function create() {
+    if (!name.trim()) return;
+    try {
+      const newSet = await SetRepo.create(name.trim());
+      router.push(`/sets/${newSet.id}`); // Navigate to the newly created set
+    } catch (error) {
+      console.error('Failed to create set:', error);
+    }
+  }
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === 'Enter') {
         e.preventDefault();
         create();
       }
@@ -27,21 +37,12 @@ export default function NewSetModal() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name]);
-
-  async function create() {
-    if (!name.trim()) return;
-    try {
-      await SetRepo.create(name.trim());
-      router.back(); // Close the modal
-    } catch (error) {
-      console.error('Failed to create set:', error);
-    }
-  }
 
   return (
     <Modal 
-      title="New set" 
+      title="Create new set" 
       className="w-[540px] h-[340px] bg-[#F6F4F0] rounded-lg p-8"
       titleClassName="font-bitter font-bold text-2xl"
       titleStyle={{ color: '#1C1D17' }}
@@ -61,9 +62,13 @@ export default function NewSetModal() {
             Cancel
             <span className="ml-2 opacity-60" style={{ color: '#1C1D17' }}>Esc</span>
           </button>
-          <button onClick={create} className="btn-primary">
+          <button 
+            onClick={create} 
+            className="btn-primary"
+            style={{ paddingLeft: '24px', paddingRight: '24px', width: 'auto' }}
+          >
             Create
-            <span className="ml-2 opacity-60" style={{ color: '#F6F4F0' }}>⌘ + ↵</span>
+            <span className="ml-2" style={{ color: '#9F9E9A' }}>↵</span>
           </button>
         </div>
       </div>

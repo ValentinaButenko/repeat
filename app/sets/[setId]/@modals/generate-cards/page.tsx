@@ -1,10 +1,21 @@
 "use client";
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import CardGenerationModal from '../../../../../components/CardGenerationModal';
+import { db } from '../../../../../db';
+import type { CardSet } from '../../../../../db/types';
 
 export default function GenerateCardsModal() {
-  const router = useRouter();
   const params = useParams<{ setId: string }>();
+  const [set, setSet] = useState<CardSet | null>(null);
+
+  useEffect(() => {
+    if (params.setId) {
+      db.sets.get(params.setId).then((s) => {
+        if (s) setSet(s);
+      });
+    }
+  }, [params.setId]);
 
   function onGenerated() {
     // Trigger a custom event to refresh the set page
@@ -13,9 +24,14 @@ export default function GenerateCardsModal() {
     }
   }
 
+  if (!set) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <CardGenerationModal
       setId={params.setId}
+      setName={set.name}
       onGenerated={onGenerated}
     />
   );

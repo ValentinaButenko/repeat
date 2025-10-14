@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../db';
 
 interface GenerateCardsRequest {
   amount: number;
@@ -29,18 +28,46 @@ export async function POST(req: Request) {
 
     const openaiKey = process.env.OPENAI_API_KEY;
     
-    // Generate words with duplicate filtering
-    const uniqueWords = await generateUniqueWords(
-      amount,
-      complexity,
-      prompt,
-      nativeLanguage,
-      learningLanguage,
-      setId,
-      openaiKey
-    );
+    // Create a streaming response
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Stream cards as they're generated
+          await streamGenerateUniqueWords(
+            amount,
+            complexity,
+            prompt,
+            nativeLanguage,
+            learningLanguage,
+            setId,
+            openaiKey,
+            (word) => {
+              // Send each word as it's generated
+              const data = JSON.stringify(word);
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+            }
+          );
+          
+          // Send completion signal
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        } catch (error) {
+          console.error('Streaming error:', error);
+          const errorData = JSON.stringify({ error: 'Failed to generate cards' });
+          controller.enqueue(encoder.encode(`data: ${errorData}\n\n`));
+          controller.close();
+        }
+      },
+    });
 
-    return NextResponse.json({ words: uniqueWords }, { status: 200 });
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error) {
     console.error('Error generating cards:', error);
     return NextResponse.json(
@@ -127,8 +154,8 @@ async function generateWordsWithOpenAI(
     
     // Validate and clean the response
     words = words
-      .filter((w: any) => w?.front && w?.back)
-      .map((w: any) => ({
+      .filter((w: { front?: string; back?: string }) => w?.front && w?.back)
+      .map((w: { front: string; back: string }) => ({
         front: String(w.front).trim(),
         back: String(w.back).trim()
       }))
@@ -175,7 +202,7 @@ async function generateWordsWithFreeMethod(
     // Use free translation service - translate from English to learning language
     let learningWord = '';
     try {
-      const { translate } = await import('../../lib/translation');
+      const { translate } = await import('../../../lib/translation');
       learningWord = await translate(front, 'en', learningLanguage);
       if (!learningWord || learningWord.trim() === '') {
         learningWord = front; // Fallback to original word
@@ -223,23 +250,25 @@ function getWordsForComplexity(complexity: string) {
   return baseWords[complexity as keyof typeof baseWords] || baseWords.Beginner;
 }
 
-// Generate unique words, retrying if needed to reach the requested amount
-async function generateUniqueWords(
+// Streaming version that emits words one at a time
+async function streamGenerateUniqueWords(
   amount: number,
   complexity: string,
   prompt: string,
   nativeLanguage: string,
   learningLanguage: string,
   setId: string,
-  openaiKey?: string
-): Promise<Array<{ front: string; back: string }>> {
+  openaiKey: string | undefined,
+  onWord: (word: { front: string; back: string }) => void
+): Promise<void> {
   const maxAttempts = 3;
-  let allUniqueWords: Array<{ front: string; back: string }> = [];
+  let generatedCount = 0;
   let attempt = 0;
+  const seenWords = new Set<string>();
 
-  while (allUniqueWords.length < amount && attempt < maxAttempts) {
+  while (generatedCount < amount && attempt < maxAttempts) {
     attempt++;
-    const remainingAmount = amount - allUniqueWords.length;
+    const remainingAmount = amount - generatedCount;
     
     let words: Array<{ front: string; back: string }> = [];
     
@@ -270,44 +299,30 @@ async function generateUniqueWords(
       );
     }
     
-    // Filter out duplicates
-    const uniqueWords = await filterDuplicates(words, setId);
-    allUniqueWords.push(...uniqueWords);
+    // Filter out in-session duplicates and stream each word
+    let newWordsCount = 0;
+    for (const word of words) {
+      if (generatedCount >= amount) break;
+      
+      const normalizedFront = word.front.toLowerCase().trim();
+      
+      // Check if we've already emitted this word in this session
+      if (seenWords.has(normalizedFront)) continue;
+      
+      // Mark as seen and emit (duplicate checking will happen on client side)
+      seenWords.add(normalizedFront);
+      onWord(word);
+      generatedCount++;
+      newWordsCount++;
+    }
     
-    console.log(`Attempt ${attempt}: Generated ${words.length} words, ${uniqueWords.length} unique, total unique: ${allUniqueWords.length}/${amount}`);
+    console.log(`Attempt ${attempt}: Streamed ${newWordsCount} words, total: ${generatedCount}/${amount}`);
     
-    // If we got no unique words, break to avoid infinite loop
-    if (uniqueWords.length === 0) {
-      console.warn('No unique words generated, stopping attempts');
+    // If we got no new words, break to avoid infinite loop
+    if (newWordsCount === 0) {
+      console.warn('No new words generated, stopping attempts');
       break;
     }
-  }
-  
-  return allUniqueWords.slice(0, amount); // Ensure we don't exceed requested amount
-}
-
-// Filter out words that already exist in the set
-async function filterDuplicates(
-  words: Array<{ front: string; back: string }>,
-  setId: string
-): Promise<Array<{ front: string; back: string }>> {
-  try {
-    // Get existing cards in the set
-    const existingCards = await db.cards.where('setId').equals(setId).toArray();
-    const existingFronts = new Set(existingCards.map(card => card.front.toLowerCase().trim()));
-    
-    // Filter out duplicates
-    const uniqueWords = words.filter(word => {
-      const normalizedFront = word.front.toLowerCase().trim();
-      return !existingFronts.has(normalizedFront);
-    });
-    
-    console.log(`Filtered ${words.length - uniqueWords.length} duplicates from ${words.length} generated words`);
-    return uniqueWords;
-  } catch (error) {
-    console.error('Error filtering duplicates:', error);
-    // Return original words if filtering fails
-    return words;
   }
 }
 
