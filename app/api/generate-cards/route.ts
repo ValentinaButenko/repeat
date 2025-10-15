@@ -183,6 +183,7 @@ async function generateWordsWithFreeMethod(
   // Get predefined words based on complexity
   const baseWords = getWordsForComplexity(complexity);
   const generatedCards = [];
+  const { translate } = await import('../../../lib/translation');
   
   // Generate the requested number of cards
   for (let i = 0; i < amount; i++) {
@@ -190,30 +191,41 @@ async function generateWordsWithFreeMethod(
     const englishWord = baseWords[wordIndex];
     
     // Add context variation based on prompt
-    let front = englishWord;
+    let baseWord = englishWord;
     if (prompt.toLowerCase().includes('food') || prompt.toLowerCase().includes('cooking')) {
-      front = `${englishWord} (food context)`;
+      baseWord = `${englishWord} (food context)`;
     } else if (prompt.toLowerCase().includes('business') || prompt.toLowerCase().includes('work')) {
-      front = `${englishWord} (business context)`;
+      baseWord = `${englishWord} (business context)`;
     } else if (prompt.toLowerCase().includes('travel')) {
-      front = `${englishWord} (travel context)`;
+      baseWord = `${englishWord} (travel context)`;
     }
     
-    // Use free translation service - translate from English to learning language
-    let learningWord = '';
+    // Translate from English to learning language (front of card)
+    let learningWord = baseWord;
     try {
-      const { translate } = await import('../../../lib/translation');
-      learningWord = await translate(front, 'en', learningLanguage);
+      learningWord = await translate(baseWord, 'en', learningLanguage);
       if (!learningWord || learningWord.trim() === '') {
-        learningWord = front; // Fallback to original word
+        learningWord = baseWord; // Fallback to original word
       }
     } catch (error) {
-      console.warn(`Translation failed for "${front}":`, error);
-      learningWord = front; // Fallback to original word
+      console.warn(`Translation to learning language failed for "${baseWord}":`, error);
+      learningWord = baseWord; // Fallback to original word
     }
     
-    // Front = learning language, Back = native language (English)
-    generatedCards.push({ front: learningWord, back: front });
+    // Translate from English to native language (back of card)
+    let nativeWord = baseWord;
+    try {
+      nativeWord = await translate(baseWord, 'en', nativeLanguage);
+      if (!nativeWord || nativeWord.trim() === '') {
+        nativeWord = baseWord; // Fallback to original word
+      }
+    } catch (error) {
+      console.warn(`Translation to native language failed for "${baseWord}":`, error);
+      nativeWord = baseWord; // Fallback to original word
+    }
+    
+    // Front = learning language, Back = native language
+    generatedCards.push({ front: learningWord, back: nativeWord });
   }
   
   return generatedCards;
