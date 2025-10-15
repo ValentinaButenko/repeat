@@ -27,6 +27,8 @@ export async function POST(req: Request) {
     }
 
     const openaiKey = process.env.OPENAI_API_KEY;
+    console.log('[Generate Cards] OpenAI key present:', !!openaiKey);
+    console.log('[Generate Cards] Languages:', { learningLanguage, nativeLanguage });
     
     // Create a streaming response
     const encoder = new TextEncoder();
@@ -85,6 +87,8 @@ async function generateWordsWithOpenAI(
   learningLanguage: string,
   apiKey: string
 ): Promise<Array<{ front: string; back: string }>> {
+  console.log(`[OpenAI] Starting generation: ${amount} ${complexity} words, ${learningLanguage} → ${nativeLanguage}`);
+  
   const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com';
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
@@ -291,6 +295,7 @@ async function streamGenerateUniqueWords(
     
     // Try OpenAI first if available
     if (openaiKey && openaiKey !== 'your-api-key-here') {
+      console.log(`[Stream] Using OpenAI for generation (attempt ${attempt})`);
       try {
         words = await generateWordsWithOpenAI(
           remainingAmount,
@@ -300,9 +305,13 @@ async function streamGenerateUniqueWords(
           learningLanguage,
           openaiKey
         );
+        console.log(`[Stream] OpenAI returned ${words.length} words`);
       } catch (error) {
-        console.warn(`OpenAI generation attempt ${attempt} failed, falling back to free method:`, error);
+        console.error(`[Stream] OpenAI generation attempt ${attempt} failed:`, error);
+        console.log('[Stream] Falling back to free method');
       }
+    } else {
+      console.log('[Stream] No OpenAI key available, using free method');
     }
     
     // Fallback to free method if OpenAI failed or not available
