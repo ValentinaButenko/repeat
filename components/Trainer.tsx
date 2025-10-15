@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { Card, ReviewRating, UUID } from '../db/types';
 import { db } from '../db';
 import { getDueCards, review } from '../lib/fsrs';
@@ -17,6 +18,7 @@ interface Props {
 type Phase = 'show' | 'reveal' | 'done';
 
 export default function Trainer({ scope, forceAll = false }: Props) {
+  const router = useRouter();
   const [cards, setCards] = useState<Card[]>([]);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('show');
@@ -279,9 +281,16 @@ export default function Trainer({ scope, forceAll = false }: Props) {
           <div className="flex items-center justify-center gap-6 mt-6">
             <button
               className="btn-primary"
-              onClick={restartAll}
+              onClick={() => {
+                const setId = scopeHasAll(scope) ? null : (scope as { setId: UUID }).setId;
+                if (setId) {
+                  router.push(`/sets/${setId}`);
+                } else {
+                  router.push('/home');
+                }
+              }}
             >
-              Repeat again
+              Back to cards list
             </button>
           </div>
         </div>
