@@ -290,7 +290,7 @@ export default function Trainer({ scope, forceAll = false }: Props) {
                 }
               }}
             >
-              Back to cards list
+              Back to set
             </button>
           </div>
         </div>
