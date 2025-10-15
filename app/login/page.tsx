@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#E8E2D9' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 -mx-[360px]" style={{ background: '#E8E2D9' }}>
       <div className="w-full" style={{ maxWidth: '1200px' }}>
         <div className="rounded-[20px] p-16 flex items-center gap-24" style={{ background: 'rgba(255, 255, 255, 0.4)', height: '800px' }}>
           {/* Left side - Form */}
