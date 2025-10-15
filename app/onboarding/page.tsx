@@ -328,7 +328,7 @@ export default function OnboardingPage() {
                 marginBottom: '64px'
               }}
             >
-              Let's set your languages first
+              Let&apos;s set your languages first
             </p>
 
             <div className="flex items-center gap-6">
@@ -426,7 +426,7 @@ export default function OnboardingPage() {
                 paddingRight: '24px'
               }}
             >
-              Let's go
+              Let&apos;s go
             </button>
           </>
         )}
@@ -456,7 +456,7 @@ export default function OnboardingPage() {
                 marginBottom: '40px'
               }}
             >
-              Let's start from scratch
+              Let&apos;s start from scratch
             </p>
 
             <div className="flex flex-col gap-6">

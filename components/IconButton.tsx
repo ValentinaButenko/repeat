@@ -57,11 +57,6 @@ export default function IconButton({
           e.currentTarget.style.color = '#494A45';
         }
       }}
-      onMouseLeave={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.color = '#8D8E8B';
-        }
-      }}
     >
       <div className="w-5 h-5 flex items-center justify-center">
         {children}

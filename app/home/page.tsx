@@ -143,7 +143,7 @@ export default function HomePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1>Repeat</h1>
-          <p className="subtitle mt-2">Let's repeat some words today.</p>
+          <p className="subtitle mt-2">Let&apos;s repeat some words today.</p>
         </div>
         {userSettings && (
           <div className="flex items-center gap-2">

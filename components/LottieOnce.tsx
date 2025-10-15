@@ -12,7 +12,7 @@ export default function LottieOnce({ src, className, style }: Props) {
 
   useEffect(() => {
     let mounted = true;
-    let anim: any;
+    let anim: unknown;
     async function load() {
       try {
         const lottie = await import('lottie-web');
@@ -28,15 +28,15 @@ export default function LottieOnce({ src, className, style }: Props) {
           path: src,
         });
         
-        anim.addEventListener('data_ready', () => {
+        (anim as typeof lottie.AnimationItem).addEventListener('data_ready', () => {
           console.log('Lottie animation data ready');
         });
         
-        anim.addEventListener('complete', () => {
+        (anim as typeof lottie.AnimationItem).addEventListener('complete', () => {
           console.log('Lottie animation completed');
         });
         
-        anim.addEventListener('error', (error: any) => {
+        (anim as typeof lottie.AnimationItem).addEventListener('error', (error: unknown) => {
           console.error('Lottie animation error:', error);
         });
         
@@ -47,7 +47,9 @@ export default function LottieOnce({ src, className, style }: Props) {
     load();
     return () => {
       mounted = false;
-      if (anim) anim.destroy?.();
+      if (anim && typeof anim === 'object' && 'destroy' in anim && typeof anim.destroy === 'function') {
+        anim.destroy();
+      }
     };
   }, [src]);
 
