@@ -6,7 +6,6 @@ import { db } from '../../../db';
 import type { Card, CardSet } from '../../../db/types';
 import Breadcrumbs from '../../../components/Breadcrumbs';
 import IconButton from '../../../components/IconButton';
-import ConfirmModal from '../../../components/ConfirmModal';
 import { CardRepo } from '../../../repo/cards';
 import { Plus, MagicWand, TrashSimple, Play } from '@phosphor-icons/react';
 import { analytics } from '../../../lib/analytics';
@@ -67,7 +66,6 @@ export default function SetDetails() {
   const [set, setSet] = useState<CardSet | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [query, setQuery] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState<{ cardId: string; cardFront: string } | null>(null);
 
   async function load() {
     const id = params.setId;
@@ -93,27 +91,15 @@ export default function SetDetails() {
     return () => window.removeEventListener('cards:changed', onChanged as EventListener);
   }, [params.setId]);
 
-  function handleDeleteCard(cardId: string, cardFront: string) {
-    setDeleteConfirm({ cardId, cardFront });
-  }
-
-  async function confirmDelete() {
-    if (!deleteConfirm) return;
-    
+  async function handleDeleteCard(cardId: string, cardFront: string) {
     try {
-      await CardRepo.remove(deleteConfirm.cardId);
+      await CardRepo.remove(cardId);
       // Refresh the cards list
       await load();
-      setDeleteConfirm(null);
     } catch (error) {
       console.error('Failed to delete card:', error);
       alert('Failed to delete card. Please try again.');
-      setDeleteConfirm(null);
     }
-  }
-
-  function cancelDelete() {
-    setDeleteConfirm(null);
   }
 
   if (!set) return <div className="p-6">Set not found.</div>;
@@ -236,18 +222,6 @@ export default function SetDetails() {
             </div>
           )}
         </>
-      )}
-
-      {deleteConfirm && (
-        <ConfirmModal
-          title="Delete card"
-          message={`Are you sure you want to delete "${deleteConfirm.cardFront}"?`}
-          confirmText="Delete"
-          cancelText="Cancel"
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-          isDestructive={true}
-        />
       )}
     </div>
   );
