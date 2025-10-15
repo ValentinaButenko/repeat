@@ -11,6 +11,7 @@ import LanguageSelector from '../../components/LanguageSelector';
 import IconButton from '../../components/IconButton';
 import ConfirmModal from '../../components/ConfirmModal';
 import { ArrowRight, StackPlus, Plus, TrashSimple } from '@phosphor-icons/react';
+import { analytics } from '../../lib/analytics';
 
 interface SetCardProps {
   set: CardSet;
@@ -175,6 +176,9 @@ export default function HomePage() {
               <button
                 className="btn-primary"
                 onClick={() => {
+                  // Track Study button click from home
+                  analytics.studyClickedHome(lastSetId, sets.find(s => s.id === lastSetId)?.name);
+                  
                   if (lastSetId) router.push(`/study/${lastSetId}?restart=1`);
                   else router.push('/study/all');
                 }}

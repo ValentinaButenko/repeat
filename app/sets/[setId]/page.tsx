@@ -9,6 +9,7 @@ import IconButton from '../../../components/IconButton';
 import ConfirmModal from '../../../components/ConfirmModal';
 import { CardRepo } from '../../../repo/cards';
 import { Plus, MagicWand, TrashSimple, Play } from '@phosphor-icons/react';
+import { analytics } from '../../../lib/analytics';
 
 interface CardComponentProps {
   card: Card;
@@ -129,10 +130,18 @@ export default function SetDetails() {
       <div className="flex items-center justify-between mt-1">
         <h1 className="m-0">{set.name}</h1>
         {cards.length > 0 && (
-          <Link href={`/study/${setId}?restart=1`} className="btn-primary" style={{ width: 'auto', paddingLeft: '24px', paddingRight: '24px' }}>
+          <button 
+            onClick={() => {
+              // Track Study button click from set details
+              analytics.studyClickedSetDetails(setId, set.name);
+              router.push(`/study/${setId}?restart=1`);
+            }} 
+            className="btn-primary" 
+            style={{ width: 'auto', paddingLeft: '24px', paddingRight: '24px' }}
+          >
             <span>Study</span>
             <Play size={20} weight="fill" />
-          </Link>
+          </button>
         )}
       </div>
 

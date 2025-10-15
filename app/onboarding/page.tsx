@@ -8,6 +8,7 @@ import { SetRepo } from '../../repo/sets';
 import { safeCreateCard, CardRepo } from '../../repo/cards';
 import IconButton from '../../components/IconButton';
 import type { Card, UUID } from '../../db/types';
+import { analytics } from '../../lib/analytics';
 
 type OnboardingStep = 'languages' | 'configure' | 'generating' | 'review';
 
@@ -151,7 +152,11 @@ export default function OnboardingPage() {
     setNativeError(hasNativeError);
     
     if (learning && native) {
-    await UserSettingsRepo.save({ learningLanguage: learning, nativeLanguage: native });
+      await UserSettingsRepo.save({ learningLanguage: learning, nativeLanguage: native });
+      
+      // Track onboarding completed
+      analytics.onboardingCompleted(learning, native);
+      
       setStep('configure');
     }
   }
@@ -276,6 +281,9 @@ export default function OnboardingPage() {
 
   async function handleStartStudy() {
     if (setId) {
+      // Track Study button click from onboarding
+      analytics.studyClickedOnboarding();
+      
       router.push(`/study/${setId}`);
     }
   }
