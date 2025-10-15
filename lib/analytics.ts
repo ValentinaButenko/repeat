@@ -12,6 +12,7 @@ export function initMixpanel() {
     debug: process.env.NODE_ENV === 'development',
     track_pageview: true,
     persistence: 'localStorage',
+    api_host: 'https://api-eu.mixpanel.com', // EU data center
   });
   
   isInitialized = true;
