@@ -47,7 +47,7 @@ export default function Breadcrumbs() {
           >
             Home
           </Link>
-          <Dot size={16} className="text-[#8D8E8B]" />
+          <CaretLeft size={20} className="text-[#8D8E8B]" />
           <Link
             href={`/sets/${setId}`}
             className="inline-flex items-center gap-2 no-underline hover:opacity-80 active:opacity-60"
@@ -59,7 +59,7 @@ export default function Breadcrumbs() {
           >
             {setName ?? 'Set'}
           </Link>
-          <Dot size={16} className="text-[#8D8E8B]" />
+          <CaretLeft size={20} className="text-[#8D8E8B]" />
           <span 
             className="text-[#1C1D17]"
             style={{ 
@@ -68,7 +68,7 @@ export default function Breadcrumbs() {
               fontSize: '16px' 
             }}
           >
-            Study cards
+            Study cards {setName}
           </span>
         </nav>
       </div>
