@@ -63,6 +63,7 @@ function CardComponent({ card, setId, onDelete }: CardComponentProps) {
 export default function SetDetails() {
   const params = useParams<{ setId: string }>();
   const search = useSearchParams();
+  const router = useRouter();
   const [set, setSet] = useState<CardSet | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [query, setQuery] = useState('');
