@@ -180,6 +180,8 @@ async function generateWordsWithFreeMethod(
   nativeLanguage: string,
   learningLanguage: string
 ): Promise<Array<{ front: string; back: string }>> {
+  console.log(`[Free Method] Generating ${amount} cards: ${learningLanguage} → ${nativeLanguage}`);
+  
   // Get predefined words based on complexity
   const baseWords = getWordsForComplexity(complexity);
   const generatedCards = [];
@@ -190,44 +192,47 @@ async function generateWordsWithFreeMethod(
     const wordIndex = i % baseWords.length;
     const englishWord = baseWords[wordIndex];
     
-    // Add context variation based on prompt
-    let baseWord = englishWord;
-    if (prompt.toLowerCase().includes('food') || prompt.toLowerCase().includes('cooking')) {
-      baseWord = `${englishWord} (food context)`;
-    } else if (prompt.toLowerCase().includes('business') || prompt.toLowerCase().includes('work')) {
-      baseWord = `${englishWord} (business context)`;
-    } else if (prompt.toLowerCase().includes('travel')) {
-      baseWord = `${englishWord} (travel context)`;
-    }
+    // Don't add context variation - it breaks translation
+    const baseWord = englishWord;
     
     // Translate from English to learning language (front of card)
     let learningWord = baseWord;
     try {
-      learningWord = await translate(baseWord, 'en', learningLanguage);
-      if (!learningWord || learningWord.trim() === '') {
-        learningWord = baseWord; // Fallback to original word
+      const translated = await translate(baseWord, 'en', learningLanguage);
+      if (translated && translated.trim() !== '') {
+        learningWord = translated;
+        console.log(`[Translation] "${baseWord}" (en → ${learningLanguage}) = "${translated}"`);
+      } else {
+        console.warn(`[Translation] Empty result for "${baseWord}" (en → ${learningLanguage})`);
       }
     } catch (error) {
-      console.warn(`Translation to learning language failed for "${baseWord}":`, error);
-      learningWord = baseWord; // Fallback to original word
+      console.error(`[Translation] Failed for "${baseWord}" (en → ${learningLanguage}):`, error);
     }
     
     // Translate from English to native language (back of card)
     let nativeWord = baseWord;
     try {
-      nativeWord = await translate(baseWord, 'en', nativeLanguage);
-      if (!nativeWord || nativeWord.trim() === '') {
-        nativeWord = baseWord; // Fallback to original word
+      const translated = await translate(baseWord, 'en', nativeLanguage);
+      if (translated && translated.trim() !== '') {
+        nativeWord = translated;
+        console.log(`[Translation] "${baseWord}" (en → ${nativeLanguage}) = "${translated}"`);
+      } else {
+        console.warn(`[Translation] Empty result for "${baseWord}" (en → ${nativeLanguage})`);
       }
     } catch (error) {
-      console.warn(`Translation to native language failed for "${baseWord}":`, error);
-      nativeWord = baseWord; // Fallback to original word
+      console.error(`[Translation] Failed for "${baseWord}" (en → ${nativeLanguage}):`, error);
     }
     
     // Front = learning language, Back = native language
     generatedCards.push({ front: learningWord, back: nativeWord });
+    
+    // Small delay to avoid rate limiting
+    if (i > 0 && i % 5 === 0) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
   }
   
+  console.log(`[Free Method] Generated ${generatedCards.length} cards`);
   return generatedCards;
 }
 
