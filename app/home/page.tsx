@@ -26,9 +26,9 @@ function SetCard({ set, count, onDelete }: SetCardProps) {
     router.push(`/sets/${set.id}`);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDeleteClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     onDelete(set.id, set.name);
   };
 
