@@ -16,7 +16,7 @@ interface Props {
 export default function CardGenerationModal({ setId, setName, onGenerated }: Props) {
   const router = useRouter();
   const { showProgress, updateProgress, hideProgress } = useGeneration();
-  const [cardAmount, setCardAmount] = useState<50 | 100 | 150 | 200>(50);
+  const [cardAmount, setCardAmount] = useState<5 | 10 | 15 | 20>(5);
   const [complexity, setComplexity] = useState<'Beginner' | 'Intermediate' | 'Advanced'>('Beginner');
   const [prompt, setPrompt] = useState('Basic words for everyday use');
   const [error, setError] = useState<string | null>(null);
@@ -179,10 +179,10 @@ export default function CardGenerationModal({ setId, setName, onGenerated }: Pro
             Cards amount
           </label>
           <div className="flex gap-2">
-            {[50, 100, 150, 200].map((amount) => (
+            {[5, 10, 15, 20].map((amount) => (
               <button
                 key={amount}
-                onClick={() => setCardAmount(amount as 50 | 100 | 150 | 200)}
+                onClick={() => setCardAmount(amount as 5 | 10 | 15 | 20)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   cardAmount === amount
                     ? 'bg-[#1C1D17] text-white border border-[#1C1D17]'
