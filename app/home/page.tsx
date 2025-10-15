@@ -177,7 +177,7 @@ export default function HomePage() {
                 className="btn-primary"
                 onClick={() => {
                   // Track Study button click from home
-                  analytics.studyClickedHome(lastSetId, sets.find(s => s.id === lastSetId)?.name);
+                  analytics.studyClickedHome(lastSetId ?? undefined, sets.find(s => s.id === lastSetId)?.name);
                   
                   if (lastSetId) router.push(`/study/${lastSetId}?restart=1`);
                   else router.push('/study/all');
