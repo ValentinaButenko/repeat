@@ -24,9 +24,9 @@ function CardComponent({ card, setId, onDelete }: CardComponentProps) {
     router.push(`/sets/${setId}/edit-card/${card.id}`);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDeleteClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     onDelete(card.id, card.front);
   };
 

@@ -19,9 +19,9 @@ interface CardComponentProps {
 function CardComponent({ card, onDelete }: CardComponentProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDeleteClick = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     onDelete(card.id);
   };
 
