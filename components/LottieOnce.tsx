@@ -15,12 +15,14 @@ export default function LottieOnce({ src, className, style }: Props) {
     let anim: unknown;
     async function load() {
       try {
-        const lottie = await import('lottie-web');
+        const lottieModule = await import('lottie-web');
+        const lottie = lottieModule.default || lottieModule;
         if (!mounted || !containerRef.current) return;
         
         console.log('Loading Lottie animation from:', src);
         
-        anim = lottie.loadAnimation({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        anim = (lottie as any).loadAnimation({
           container: containerRef.current,
           renderer: 'svg',
           loop: false,
@@ -28,15 +30,18 @@ export default function LottieOnce({ src, className, style }: Props) {
           path: src,
         });
         
-        (anim as typeof lottie.AnimationItem).addEventListener('data_ready', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (anim as any).addEventListener?.('data_ready', () => {
           console.log('Lottie animation data ready');
         });
         
-        (anim as typeof lottie.AnimationItem).addEventListener('complete', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (anim as any).addEventListener?.('complete', () => {
           console.log('Lottie animation completed');
         });
         
-        (anim as typeof lottie.AnimationItem).addEventListener('error', (error: unknown) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (anim as any).addEventListener?.('error', (error: unknown) => {
           console.error('Lottie animation error:', error);
         });
         
