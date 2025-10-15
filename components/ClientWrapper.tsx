@@ -13,7 +13,7 @@ export default function ClientWrapper({ children }: { children: React.ReactNode 
         current={progress.current}
         total={progress.total}
         setName={progress.setName}
-        onStop={progress.onStop}
+        onStop={progress.onStop || (() => {})}
       />
     </>
   );
