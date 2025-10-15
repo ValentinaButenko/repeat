@@ -421,7 +421,7 @@ export default function OnboardingPage() {
               onClick={handleLanguagesContinue}
               className="btn-primary mt-12"
               style={{ 
-                width: 'fit-content',
+                width: '180px',
                 paddingLeft: '24px',
                 paddingRight: '24px'
               }}
