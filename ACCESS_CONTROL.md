@@ -16,7 +16,7 @@ Your app now includes **optional password protection** that you can enable with 
 
 1. Create or edit `.env.local`:
    ```bash
-   APP_ACCESS_PASSWORD=YourSecretPassword123
+   APP_ACCESS_PASSWORD=bibbidi-bobbidi-boo
    ```
 
 2. Restart your dev server:
