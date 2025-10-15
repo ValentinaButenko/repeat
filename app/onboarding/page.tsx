@@ -293,7 +293,7 @@ export default function OnboardingPage() {
 
   // Render based on current step
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#E8E2D9' }}>
+    <div className="min-h-screen flex items-center justify-center -mx-[360px]" style={{ background: '#E8E2D9' }}>
       <div 
         className="w-full rounded-[20px] p-16 flex flex-col justify-center"
         style={{ 
