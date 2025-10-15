@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 
 interface IconButtonProps {
   children: ReactNode;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
   className?: string;
   disabled?: boolean;
   'aria-label'?: string;
@@ -20,7 +20,7 @@ export default function IconButton({
 }: IconButtonProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => onClick?.(e)}
       disabled={disabled}
       aria-label={ariaLabel}
       className={`
