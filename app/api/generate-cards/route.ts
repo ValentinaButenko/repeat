@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { LANGUAGES } from '@/lib/languages';
 
 interface GenerateCardsRequest {
   amount: number;
@@ -92,6 +93,10 @@ async function generateWordsWithOpenAI(
   const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com';
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
+  // Convert language codes to full names for better OpenAI understanding
+  const nativeLangName = LANGUAGES[nativeLanguage?.toLowerCase()] || nativeLanguage;
+  const learningLangName = LANGUAGES[learningLanguage?.toLowerCase()] || learningLanguage;
+
   // Create a detailed prompt for OpenAI
   const complexityGuide = {
     Beginner: 'simple, common, everyday words that beginners should learn first (A1-A2 level)',
@@ -103,9 +108,9 @@ async function generateWordsWithOpenAI(
 - Topic: ${prompt}
 - Complexity: ${complexityGuide[complexity as keyof typeof complexityGuide]}
 - Generate EXACTLY ${amount} unique words or short phrases
-- Words should be in ${learningLanguage} (the language the user is learning)
-- Provide the translation in ${nativeLanguage} (the user's native language)
-- Return ONLY a JSON object with this exact format: {"words": [{"front": "word in ${learningLanguage}", "back": "translation in ${nativeLanguage}"}, ...]}
+- Words should be in ${learningLangName} (the language the user is learning)
+- Provide the translation in ${nativeLangName} (the user's native language)
+- Return ONLY a JSON object with this exact format: {"words": [{"front": "word in ${learningLangName}", "back": "translation in ${nativeLangName}"}, ...]}
 - No explanations, no additional text, ONLY the JSON object
 - Ensure all words are relevant to the topic: "${prompt}"
 - Make words diverse and useful for learning`;

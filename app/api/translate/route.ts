@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { LANGUAGES } from '@/lib/languages';
 
 export async function POST(req: Request) {
   const { text, from, to } = await req.json().catch(() => ({ text: '', from: 'auto', to: 'EN' }));
@@ -31,7 +32,10 @@ export async function POST(req: Request) {
 async function translateWithOpenAI(text: string, from: string, to: string, key: string): Promise<string> {
   const baseUrl = process.env.OPENAI_BASE_URL || 'https://api.openai.com';
   const model = process.env.OPENAI_TRANSLATE_MODEL || 'gpt-4o-mini';
-  const prompt = `Translate the following text from ${from || 'auto-detected'} to ${to}. Respond with ONLY the translation, no quotes, no additional commentary.\n\n${text}`;
+  // Convert language codes to full names for better OpenAI understanding
+  const fromLang = LANGUAGES[from?.toLowerCase()] || from || 'auto-detected';
+  const toLang = LANGUAGES[to?.toLowerCase()] || to;
+  const prompt = `Translate the following text from ${fromLang} to ${toLang}. Respond with ONLY the translation, no quotes, no additional commentary.\n\n${text}`;
   try {
     const res = await fetch(baseUrl.replace(/\/$/, '') + '/v1/chat/completions', {
       method: 'POST',
