@@ -5,7 +5,7 @@ export const LANGUAGES: Record<string, string> = {
   de: 'German',
   it: 'Italian',
   pt: 'Portuguese',
-  ru: 'Russian',
+  uk: 'Ukrainian',
   zh: 'Chinese',
   ja: 'Japanese',
   ko: 'Korean',
