@@ -4,6 +4,7 @@ import "./globals.css";
 import { GenerationProvider } from "../components/GenerationContext";
 import ClientWrapper from "../components/ClientWrapper";
 import AnalyticsInit from "../components/AnalyticsInit";
+import MazeScript from "../components/MazeScript";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${bitter.variable} antialiased bg-[#E8E2D9]`}
       >
         <AnalyticsInit />
+        <MazeScript />
         <GenerationProvider>
           <div className="px-[360px]">
             <ClientWrapper>
