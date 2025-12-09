@@ -2,17 +2,17 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Simple password protection middleware
+ * Simple password protection proxy
  * 
  * To enable password protection:
  * 1. Set APP_ACCESS_PASSWORD environment variable in Vercel/Netlify
- * 2. This middleware will protect all routes except /api/auth-check
+ * 2. This proxy will protect all routes except /api/auth-check
  * 
  * To disable:
  * - Simply don't set APP_ACCESS_PASSWORD environment variable
  */
 
-export function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   // Only enable if APP_ACCESS_PASSWORD is set
   const accessPassword = process.env.APP_ACCESS_PASSWORD;
   
