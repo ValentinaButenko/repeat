@@ -84,6 +84,13 @@ export const analytics = {
     trackEvent('Onboarding Started');
   },
   
+  learningLanguageSelected: (language: string) => {
+    trackEvent('Learning Language Selected', {
+      language,
+      source: 'onboarding',
+    });
+  },
+  
   onboardingCompleted: (learningLanguage: string, nativeLanguage: string) => {
     trackEvent('Onboarding Completed', {
       learningLanguage,

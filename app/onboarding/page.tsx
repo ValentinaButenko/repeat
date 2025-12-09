@@ -368,6 +368,8 @@ export default function OnboardingPage() {
                           setLearning(code);
                           setLearningOpen(false);
                           setLearningError(false);
+                          // Track learning language selection
+                          analytics.learningLanguageSelected(label);
                         }}
                         className={`w-full text-left px-4 py-2 text-sm font-medium hover:bg-[#E8E2D9] transition-colors duration-150 ${
                           code === learning ? 'bg-[#E8E2D9] text-[#1C1D17]' : 'text-[#1C1D17]'
